@@ -1,0 +1,463 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a3ip.dev/schema/v1.5/manifest.json",
+  "title": "A3IP Manifest",
+  "description": "JSON Schema for A3IP manifest.yaml — AI Infrastructure Installation Package specification v1.5. Published at https://a3ip.dev/schema/v1.5/manifest.json",
+  "type": "object",
+  "required": ["name", "version"],
+  "additionalProperties": false,
+
+  "properties": {
+
+    "$schema": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI of this schema. Add to every manifest for IDE validation.",
+      "const": "https://a3ip.dev/schema/v1.5/manifest.json"
+    },
+
+    "a3ip": {
+      "type": "string",
+      "description": "Spec version this manifest was authored against. Prefer min_a3ip_spec for compatibility declarations.",
+      "examples": ["1.5"]
+    },
+
+    "name": {
+      "type": "string",
+      "description": "Unique package name. Must match the name in registry.yaml exactly. Lowercase letters, numbers, and hyphens only.",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "minLength": 2,
+      "examples": ["ai-code-review-flow", "project-standup-assistant"]
+    },
+
+    "version": {
+      "type": "string",
+      "description": "Package version following Semantic Versioning (MAJOR.MINOR.PATCH).",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "examples": ["1.0.0", "1.2.3"]
+    },
+
+    "description": {
+      "type": "string",
+      "description": "One-sentence description of what the package does. Used in registry listings.",
+      "maxLength": 280
+    },
+
+    "author": {
+      "type": "string",
+      "description": "Package author. Format: 'Full Name <email@example.com>'.",
+      "examples": ["Jane Smith <jane@example.com>"]
+    },
+
+    "license": {
+      "type": "string",
+      "description": "SPDX license identifier or 'proprietary'. See https://spdx.org/licenses/",
+      "examples": ["MIT", "Apache-2.0", "CC-BY-4.0", "proprietary"]
+    },
+
+    "homepage": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the package documentation, repository, or landing page."
+    },
+
+    "min_a3ip_spec": {
+      "type": "string",
+      "description": "Minimum A3IP spec version required to install this package. Omit for v1.0-only packages.",
+      "pattern": "^\\d+\\.\\d+$",
+      "examples": ["1.0", "1.1", "1.2", "1.5"]
+    },
+
+    "latest_change": {
+      "type": "string",
+      "format": "date",
+      "description": "ISO 8601 date of the last change to this package. Updated by new_version.py.",
+      "examples": ["2026-05-12"]
+    },
+
+    "trust_level": {
+      "type": "string",
+      "enum": ["read-only", "network", "write-local", "shell-exec"],
+      "description": "Highest trust level of any script in this package. Informational summary — individual script implementations also declare their own trust_level."
+    },
+
+    "permissions": {
+      "type": "object",
+      "description": "Pre-declaration of every external resource this package touches during install or operation. Shown to the user before any action is taken.",
+      "additionalProperties": false,
+      "properties": {
+
+        "filesystem": {
+          "type": "array",
+          "description": "Filesystem paths read or written by this package.",
+          "items": {
+            "type": "object",
+            "required": ["path", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "File or directory path. May use {{config.*}} substitutions.",
+                "examples": ["{{config.install_dir}}", "./reviews/", "~/.config/a3ip/"]
+              },
+              "access": {
+                "type": "string",
+                "enum": ["read", "write", "read-write"],
+                "description": "Access level required. Omit only if access type is clear from context.",
+                "default": "read-write"
+              },
+              "reason": {
+                "type": "string",
+                "description": "Why the package needs this path. Shown verbatim in the install plan."
+              }
+            }
+          }
+        },
+
+        "network": {
+          "type": "array",
+          "description": "External domains contacted by this package.",
+          "items": {
+            "type": "object",
+            "required": ["domain", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "domain": {
+                "type": "string",
+                "description": "Hostname or domain. No wildcards — list each domain explicitly.",
+                "examples": ["api.github.com", "gitlab.example.com"]
+              },
+              "reason": {
+                "type": "string",
+                "description": "Why the package contacts this domain. Shown verbatim in the install plan."
+              }
+            }
+          }
+        },
+
+        "mcp": {
+          "type": "array",
+          "description": "MCP servers this package uses.",
+          "items": {
+            "type": "object",
+            "required": ["name", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "MCP server name as declared in the platform's MCP config.",
+                "examples": ["github-mcp", "gitlab-mcp", "jira-mcp"]
+              },
+              "reason": {
+                "type": "string",
+                "description": "Why this MCP server is needed. Shown in the install plan."
+              }
+            }
+          }
+        },
+
+        "shell": {
+          "type": "array",
+          "description": "Shell commands or executables this package runs.",
+          "items": {
+            "type": "object",
+            "required": ["command", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "command": {
+                "type": "string",
+                "description": "Shell command or executable name.",
+                "examples": ["python3", "bash", "git"]
+              },
+              "reason": {
+                "type": "string",
+                "description": "Why this command is executed. Shown in the install plan."
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "components": {
+      "type": "object",
+      "description": "Components bundled in this package. All paths are relative to the package root.",
+      "additionalProperties": false,
+      "properties": {
+
+        "skills": {
+          "type": "array",
+          "description": "SKILL.md-compatible skill folders. Each must contain a SKILL.md file.",
+          "items": {
+            "type": "object",
+            "required": ["path"],
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Path to the skill folder.",
+                "examples": ["components/skills/code-review"]
+              },
+              "description": {"type": "string"}
+            }
+          }
+        },
+
+        "artifacts": {
+          "type": "array",
+          "description": "UI artifacts — persistent views the AI manages. Each must contain an artifact.md file.",
+          "items": {
+            "type": "object",
+            "required": ["path"],
+            "additionalProperties": false,
+            "properties": {
+              "path": {"type": "string", "examples": ["components/artifacts/review-inbox"]},
+              "description": {"type": "string"}
+            }
+          }
+        },
+
+        "protocols": {
+          "type": "array",
+          "description": "Named command and workflow definitions.",
+          "items": {
+            "type": "object",
+            "required": ["path"],
+            "additionalProperties": false,
+            "properties": {
+              "path": {"type": "string", "examples": ["components/protocols/move-to-review.md"]},
+              "description": {"type": "string"}
+            }
+          }
+        },
+
+        "prompts": {
+          "type": "array",
+          "description": "Reusable prompt templates.",
+          "items": {
+            "type": "object",
+            "required": ["path"],
+            "additionalProperties": false,
+            "properties": {
+              "path": {"type": "string", "examples": ["components/prompts/review-summary.md"]},
+              "description": {"type": "string"}
+            }
+          }
+        },
+
+        "scripts": {
+          "type": "array",
+          "description": "Scripts executed during install or operation. Each script uses a primary-plus-adapters pattern.",
+          "items": {
+            "type": "object",
+            "required": ["key"],
+            "additionalProperties": false,
+            "properties": {
+              "key": {
+                "type": "string",
+                "description": "Unique script key referenced in INSTALL.md.",
+                "pattern": "^[a-z0-9_]+$",
+                "examples": ["create_mr", "auth_teams"]
+              },
+              "description": {"type": "string"},
+              "parameters": {
+                "type": "array",
+                "description": "Parameter names passed to this script.",
+                "items": {"type": "string"}
+              },
+              "implementations": {
+                "type": "array",
+                "description": "One or more implementations of this script. Use platform 'any' for the cross-platform default.",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": ["file", "platform"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "description": "Path to the script file relative to package root.",
+                      "examples": ["scripts/create_mr.py", "adapters/windows/scripts/create_mr.ps1"]
+                    },
+                    "platform": {
+                      "type": "string",
+                      "description": "Platform this implementation targets.",
+                      "examples": ["any", "windows", "macos-linux", "cowork", "claude-code"]
+                    },
+                    "trust_level": {
+                      "type": "string",
+                      "enum": ["read-only", "network", "write-local", "shell-exec"],
+                      "description": "Trust level for this implementation. If omitted, the AI must assume shell-exec (most conservative)."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "dependencies": {
+      "type": "object",
+      "description": "External dependencies this package needs but does not bundle.",
+      "additionalProperties": false,
+      "properties": {
+
+        "mcp": {
+          "type": "array",
+          "description": "MCP server dependencies.",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {"type": "string", "examples": ["gitlab-mcp", "jira-mcp"]},
+              "required": {
+                "type": "boolean",
+                "default": true,
+                "description": "If false, the package degrades gracefully without this dependency."
+              },
+              "purpose": {"type": "string", "description": "What the package uses this MCP server for."},
+              "registry": {"type": "string", "description": "Registry hint for auto-installation if supported."},
+              "fallback": {
+                "type": "string",
+                "description": "Instructions for operating without this dependency. Required when required: false."
+              }
+            }
+          }
+        },
+
+        "skills": {
+          "type": "array",
+          "description": "Skill dependencies from other A3IP packages or external skill registries.",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {"type": "string"},
+              "source": {"type": "string", "description": "Source registry and version range.", "examples": ["skills.sh/git-basics@^2.0"]},
+              "required": {"type": "boolean", "default": false}
+            }
+          }
+        }
+      }
+    },
+
+    "configuration": {
+      "type": "array",
+      "description": "Configuration schema for the CONFIGURE.md wizard. Values collected here are referenced as {{config.<key>}} throughout the package.",
+      "items": {
+        "type": "object",
+        "required": ["key"],
+        "additionalProperties": false,
+        "properties": {
+
+          "key": {
+            "type": "string",
+            "description": "Config key. Referenced in package files as {{config.<key>}}.",
+            "pattern": "^[a-z0-9_]+$",
+            "examples": ["api_token", "install_dir", "reviewers"]
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable label shown to the user when asking for this value."
+          },
+          "description": {
+            "type": "string",
+            "description": "Explanation of what this value is used for."
+          },
+          "type": {
+            "type": "string",
+            "enum": ["string", "list<string>", "boolean", "number", "select", "multi-select"],
+            "description": "Data type. Used for validation and collection."
+          },
+          "required": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether this value must be provided before installation proceeds."
+          },
+          "sensitive": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, the AI must never echo, log, or display this value. Confirm receipt only."
+          },
+          "storage": {
+            "type": "string",
+            "enum": ["config-file", "env-var", "keychain"],
+            "default": "config-file",
+            "description": "Preferred storage target for sensitive values. Only relevant when sensitive: true."
+          },
+          "placeholder": {
+            "type": "string",
+            "description": "Example format to show the user (e.g. 'glpat-xxxx')."
+          },
+          "default": {
+            "description": "Default value applied if the user provides none."
+          },
+          "example": {
+            "description": "Example value shown to the user for guidance."
+          },
+          "when": {
+            "type": "string",
+            "enum": ["before", "during", "after"],
+            "default": "before",
+            "description": "When to collect this value: before all install steps, inline at the relevant step, or after install."
+          },
+          "condition": {
+            "type": "string",
+            "description": "Natural-language condition under which the AI should ask this question (e.g. 'only if Jira MCP is available')."
+          },
+          "options": {
+            "type": "array",
+            "description": "Options for select and multi-select types.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "value": {"type": "string"},
+                "label": {"type": "string"},
+                "default": {"type": "boolean", "default": false}
+              }
+            }
+          },
+          "refresh": {
+            "type": "string",
+            "enum": ["on_expiry"],
+            "description": "When the AI should re-collect this value. Use 'on_expiry' for tokens with TTLs."
+          },
+          "refresh_note": {
+            "type": "string",
+            "description": "Human-readable note explaining when and why this value needs refreshing."
+          },
+          "refresh_script": {
+            "type": "string",
+            "description": "Key of the script that regenerates this value (must match a key in components.scripts)."
+          }
+        }
+      }
+    },
+
+    "platforms": {
+      "type": "object",
+      "description": "Platform compatibility information. Informational — not enforced at install time.",
+      "additionalProperties": false,
+      "properties": {
+        "tested": {
+          "type": "array",
+          "description": "Platforms this package has been tested on and is known to work.",
+          "items": {"type": "string"},
+          "examples": [["cowork", "claude-code", "codex", "cursor"]]
+        },
+        "untested": {
+          "type": "array",
+          "description": "Platforms that may work but have not been verified by the author.",
+          "items": {"type": "string"},
+          "examples": [["copilot", "gemini-cli"]]
+        }
+      }
+    }
+
+  }
+}
