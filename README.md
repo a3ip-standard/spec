@@ -130,7 +130,7 @@ A3IP skills are a superset of [SKILL.md](https://agentskills.io) — any A3IP sk
 
 ---
 
-## How does this relate to MCP, APM, and SKILL.md?
+## How does this relate to SKILL.md and APM?
 
 | Concept | SKILL.md | APM | A3IP |
 |---|---|---|---|
@@ -141,8 +141,6 @@ A3IP skills are a superset of [SKILL.md](https://agentskills.io) — any A3IP sk
 | Permission declarations | ❌ | ❌ | ✅ `permissions:` block |
 | Delta upgrades | ❌ | ❌ | ✅ `CHANGELOG.md` |
 | Plain-text bundle format | ❌ | ❌ | ✅ `.a3ip.bundle` |
-
-## How does this relate to MCP and APM?
 
 **MCP** connects an AI to tools — file systems, databases, APIs. A3IP sits above that: it packages a complete workflow that *uses* those tools, with an explicit list of which MCP servers it requires declared in the manifest. Installing an A3IP package can include configuring MCP connections.
 
