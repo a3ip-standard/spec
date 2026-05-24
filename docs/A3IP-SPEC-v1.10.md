@@ -1,30 +1,33 @@
 # A3IP Specification v1.10
 
-*Note: v1.10 supersedes v1.9. All v1.9 packages remain valid v1.10 packages — uninstall is additive. v1.10 closes the package lifecycle by adding the uninstall flow that v1.9 deferred. Changes: (a) new normative `## Uninstalling` section in the INSTALL.md template, with Tier-marked steps UN1–UN8; (b) `adapters/runtime/<X>/uninstall-skill.md` as the canonical location for per-runtime uninstall knowledge, parallel to `install-skill.md`; (c) Writing Adapter Documents section extended to require both-direction coverage for any Tier 2 outcome the adapter addresses; (d) Validation Check 14 (Warning) — INSTALL.md should contain an `## Uninstalling` section. All changes are additive; no installation behavior changes.*
+*Note: v1.10 supersedes v1.9. All v1.9 packages remain valid v1.10 packages — uninstall is additive. v1.10 closes the package lifecycle by adding the uninstall flow that v1.9 deferred. Changes: (a) new normative `## Uninstalling` section in the INSTALL.md template, with Tier-marked steps UN1–UN8; (b) `adapters/runtime/<X>/uninstall-skill.md` as the canonical location for per-runtime uninstall knowledge, parallel to `install-skill.md`; (c) Writing Adapter Documents section extended to require both-direction coverage for any Tier 2 outcome the adapter addresses; (d) existing-install discovery promoted to a Tier 2 outcome — the spec no longer prescribes a platform-default detection path; runtime adapters describe HOW to locate prior installs on each platform; (e) new `preserve_on_uninstall` field on configuration schema keys, replacing a single uniform uninstall policy with per-key, author-declared policy; (f) Validation Check 14 (Warning) — INSTALL.md should contain an `## Uninstalling` section. All changes are additive; no installation behavior changes.*
 
 ## What's new in v1.10
 
-v1.10 closes the install/upgrade/uninstall lifecycle. v1.9 deferred uninstall to its own design pass because doing it right required deciding two things the install model didn't pre-answer: (a) the symmetry between install outcomes (Steps 5/6/7) and uninstall outcomes (Steps UN3/UN4/UN5), and (b) how to handle user-owned data (`config.json` — API tokens, project refs) that survives the workflow. v1.10 settles both.
+v1.10 closes the install/upgrade/uninstall lifecycle. v1.9 deferred uninstall to its own design pass because doing it right required deciding several things the install model didn't pre-answer: the symmetry between install outcomes (Steps 5/6/7) and uninstall outcomes (Steps UN3/UN4/UN5), how the AI locates a prior install when the user comes back to remove it months later, and how to handle user-owned data (`config.json` — API tokens, project refs) that survives the workflow. v1.10 settles all of them.
 
-**(a) New `## Uninstalling` section in INSTALL.md template.** The lifecycle from v1.0 through v1.9 covered install and upgrade — uninstall was absent. v1.10 closes the gap with eight steps (UN1–UN8), tier-marked the same way install steps are: UN1/UN2/UN6/UN7/UN8 are Tier 1 (mechanical) and UN3/UN4/UN5 are Tier 2 (outcome — adapter procedure), each the symmetric un-doing of install Steps 5/6/7:
+**(a) New `## Uninstalling` section in INSTALL.md template.** The lifecycle from v1.0 through v1.9 covered install and upgrade — uninstall was absent. v1.10 closes the gap with eight steps (UN1–UN8), tier-marked the same way install steps are: UN3/UN4/UN5 are Tier 2 (outcome — adapter procedure), each the symmetric un-doing of install Steps 5/6/7; UN1 is Tier 2 (existing-install discovery, paired with INSTALL.md Step 1 — see (d) below); the remaining steps are Tier 1 (mechanical):
 
 | Install (v1.9) | Uninstall (v1.10) |
 |---|---|
+| 1. Check for existing installation | UN1. Locate the existing install (paired with Step 1) |
 | 5. Make skills discoverable to the host runtime | UN3. Make skills un-discoverable to the host runtime |
 | 6. Make artifacts available on the host runtime | UN4. Remove artifacts from the host runtime |
 | 7. Make protocols invocable on the host runtime | UN5. Make protocols no longer invocable |
 
 The symmetry isn't decorative — it means an adapter that knows how to register a skill on Codex (write the AGENTS.md marker block) also knows the inverse (remove the marker block). The adapter knowledge is paired by construction; see (b).
 
-**(b) New adapter file: `adapters/runtime/<X>/uninstall-skill.md`.** Parallel to `install-skill.md`, this file holds the per-runtime knowledge required to satisfy UN3/UN4/UN5 on platform `<X>`. The naming convention is normative — the installing AI and the validator both rely on the filename. Adapter authors maintain one install file and one uninstall file per platform; the Creator's scaffold generates both. Folding them into a single file was considered and rejected: the two procedures often span different code paths (e.g., Codex's install touches `~/.codex/skills/` and `~/.codex/AGENTS.md`; uninstall touches the same two locations but with different operations), and keeping the per-step adapter knowledge in adjacent files makes both easier to read and easier for a validator to assert coverage symmetry.
+**(b) New adapter file: `adapters/runtime/<X>/uninstall-skill.md`.** Parallel to `install-skill.md`, this file holds the per-runtime knowledge required to satisfy UN1/UN3/UN4/UN5 on platform `<X>`. The naming convention is normative — the installing AI and the validator both rely on the filename. Adapter authors maintain one install file and one uninstall file per platform; the Creator's scaffold generates both. Folding them into a single file was considered and rejected: the two procedures often span different code paths (e.g., Codex's install touches `~/.codex/skills/` and `~/.codex/AGENTS.md`; uninstall touches the same two locations but with different operations), and keeping the per-step adapter knowledge in adjacent files makes both easier to read and easier for a validator to assert coverage symmetry.
 
-**(c) "Writing Adapter Documents" — both-direction coverage rule.** The v1.9 section that formalized adapters as Tier 3 platform-knowledge artifacts now adds one normative requirement: an adapter that addresses a Tier 2 install outcome (Steps 5/6/7) MUST have a paired uninstall adapter addressing the symmetric uninstall outcome (Steps UN3/UN4/UN5). This is the "knowledge that is wrong is worse than no knowledge" principle applied symmetrically — uninstall knowledge written without install context (or vice versa) drifts and breaks. Adapter authors satisfy the rule by maintaining `install-skill.md` and `uninstall-skill.md` as a pair.
+**(c) "Writing Adapter Documents" — both-direction coverage rule.** The v1.9 section that formalized adapters as Tier 3 platform-knowledge artifacts now adds one normative requirement: an adapter that addresses a Tier 2 install outcome (Steps 1/5/6/7) MUST have a paired uninstall adapter addressing the symmetric uninstall outcome (Steps UN1/UN3/UN4/UN5). This is the "knowledge that is wrong is worse than no knowledge" principle applied symmetrically — uninstall knowledge written without install context (or vice versa) drifts and breaks. Adapter authors satisfy the rule by maintaining `install-skill.md` and `uninstall-skill.md` as a pair.
 
-**(d) Config preservation is always-asked.** Step UN2 (the Uninstall Plan) MUST present the user with an explicit choice for `config.json`: preserve it (default user data, API tokens, project refs survive) or purge it (the install_dir is wiped completely). The spec does NOT assign a default — the AI asks every time. Rationale: uninstall is a low-frequency, high-consequence action. Defaulting either way fails users who expected the other. Asking once is cheaper than recovering a wiped token or apologizing for unexpected leftover data.
+**(d) Existing-install discovery is a Tier 2 outcome.** Earlier v1.10 drafts prescribed "look at the platform-default install location" in INSTALL.md Step 1 and Uninstall Step UN1. That language has been removed. The spec now states the outcome — "the AI MUST know whether this package is already installed on the host" — and delegates HOW to the runtime adapter, exactly as Steps 5/6/7 and UN3/UN4/UN5 do for their respective outcomes. The rationale is the same one that drove the v1.7 two-tier adapter model: a platform may reorganize its package conventions (move from `~/.claude/packages/` to a per-user index, register installs through a system service, etc.), but the spec's contract with the package author should not change. By making discovery a Tier 2 outcome, the spec is platform-neutral by construction; the platform's adapter carries whatever discovery mechanism is current on that platform. This also makes custom `install_dir` values cleanly supportable — the adapter's discovery routine determines how (and whether) custom locations are reachable, rather than the spec mandating a single lookup path that fails on non-default installs.
 
-**(e) Validation Check 14 (Warning).** INSTALL.md SHOULD contain an `## Uninstalling` section. Warning if absent — gentle adoption now, hardened to error in v2.0 (the same trajectory as Checks 11/12/13 from v1.9). The check is structural: it looks for the section header. Step structure inside the section is the author's responsibility.
+**(e) Per-key `preserve_on_uninstall` on configuration schema.** The first v1.10 drafts mandated a single binary choice at uninstall time — preserve `config.json` entirely or purge it entirely — and made the AI ask the user every time. That conflates the policy decision (which values are precious vs. throwaway) with the user's confirmation. The policy is properly the package author's domain: only the author knows that the API token is worth keeping while the install timestamp is not. v1.10 introduces a new field, `preserve_on_uninstall: true | false | "ask"`, that the author MAY set on each entry in the configuration schema. Default per key (if the field is omitted) is `"ask"`. Step UN2 walks the schema during the Uninstall Plan: keys marked `true` are silently preserved, keys marked `false` are silently purged, and only keys marked (or defaulting to) `"ask"` prompt the user for a per-key decision. This preserves user control where it matters and removes friction where it doesn't.
 
-**Backward compatibility:** All v1.9 packages remain valid under v1.10. Uninstall is additive — a package without an `## Uninstalling` section still installs and upgrades correctly; the validator emits Check 14 as a warning, not an error. Packages without `uninstall-skill.md` adapter files have no install behavior change either; the warning surfaces in Check 11 (now extended to scan both install and uninstall coverage). The new adapter file convention is normative for new authoring; packages predating v1.10 are not retroactively required to add uninstall coverage to ship.
+**(f) Validation Check 14 (Warning).** INSTALL.md SHOULD contain an `## Uninstalling` section. Warning if absent — gentle adoption now, hardened to error in v2.0 (the same trajectory as Checks 11/12/13 from v1.9). The check is structural: it looks for the section header. Step structure inside the section is the author's responsibility.
+
+**Backward compatibility:** All v1.9 packages remain valid under v1.10. Uninstall is additive — a package without an `## Uninstalling` section still installs and upgrades correctly; the validator emits Check 14 as a warning, not an error. Packages without `uninstall-skill.md` adapter files have no install behavior change either; the warning surfaces in Check 11 (now extended to scan both install and uninstall coverage). Configuration schemas without `preserve_on_uninstall` fields are valid — every key defaults to `"ask"`, matching pre-v1.10 expectations. The new adapter file convention is normative for new authoring; packages predating v1.10 are not retroactively required to add uninstall coverage to ship.
 
 ---
 
@@ -622,6 +625,7 @@ Over time, as a platform's behavior stabilizes, adapter authors should shift suc
 
 Each platform's runtime adapter SHOULD address each Tier 2 outcome in [INSTALL.md](#installmd) that its platform influences:
 
+- Step 1 (existing-install discovery, v1.10+) — every runtime adapter should describe how to determine whether a prior install of a package exists on the platform, and how to locate its `config_dir`. The same discovery mechanism is reused by Uninstall Step UN1, so `install-skill.md` and `uninstall-skill.md` MAY cross-reference rather than duplicate.
 - Step 5 (skills discoverable) — every runtime adapter should describe how the platform discovers/loads skills.
 - Step 6 (artifacts available) — every runtime adapter should describe its artifact mechanism (HTML support, markdown fallback, etc.).
 - Step 7 (protocols invocable) — every runtime adapter should describe its trigger/registration mechanism.
@@ -637,7 +641,7 @@ Each platform's runtime adapter is a pair of files, not a single file:
 
 The filenames are normative — the installing AI looks for them by exact name when entering the install or uninstall flow, and the validator's coverage checks scan them separately. Authors maintain both as a pair.
 
-**Both-direction coverage rule.** An adapter that documents how to satisfy an install outcome (Step 5/6/7) MUST also document how to satisfy the symmetric uninstall outcome (Step UN3/UN4/UN5) on the same platform. Asymmetric coverage — install knowledge with no uninstall counterpart — is the v1.10 equivalent of the "knowledge that is wrong is worse than no knowledge" problem: an installing AI that can register a Codex skill but can't deregister it leaves users unable to cleanly remove what they installed.
+**Both-direction coverage rule.** An adapter that documents how to satisfy an install outcome (Step 1, 5, 6, or 7) MUST also document how to satisfy the symmetric uninstall outcome (Step UN1, UN3, UN4, or UN5 respectively) on the same platform. Asymmetric coverage — install knowledge with no uninstall counterpart — is the v1.10 equivalent of the "knowledge that is wrong is worse than no knowledge" problem: an installing AI that can register a Codex skill but can't deregister it leaves users unable to cleanly remove what they installed; an adapter that knows how to find an existing install but doesn't describe the inverse for uninstall is equally broken.
 
 The rule is satisfied by writing both files. The symmetry is at the file-presence level, not line-by-line — `uninstall-skill.md` does not need to mirror `install-skill.md` structurally, only to address the corresponding outcomes.
 
@@ -764,13 +768,15 @@ The reference implementation is the `a3ip` CLI distributed via [PyPI](https://py
 
 ### Check 11 — Adapter outcome coverage (v1.9+)
 
-**Rule:** Each platform listed in `platforms.tested` whose adapter exists at `adapters/runtime/<X>/install-skill.md` SHOULD reference each Tier 2 outcome it influences (Steps 5/6/7 of the canonical INSTALL.md). Specifically: the adapter should contain content addressing skill discovery, artifact availability, and protocol invocability for any of those component categories the package declares.
+**Rule:** Each platform listed in `platforms.tested` whose adapter exists at `adapters/runtime/<X>/install-skill.md` SHOULD reference each Tier 2 outcome it influences (Steps 1, 5, 6, 7 of the canonical INSTALL.md). Specifically: the adapter should contain content addressing existing-install discovery, skill discovery, artifact availability, and protocol invocability for any of those component categories the package declares.
 
-**Detection:** The validator scans the adapter for references to each outcome step's keywords ("skills", "artifacts", "protocols") or to the outcome names ("discoverable", "available", "invocable").
+**Detection:** The validator scans the adapter for references to each outcome step's keywords ("existing install", "installed.json", "discovery", "locate", "skills", "artifacts", "protocols") or to the outcome names ("discoverable", "available", "invocable").
 
 **Outcome:** Warning for each (platform, outcome) pair where the platform's adapter doesn't reference the outcome.
 
 **Rationale:** Adapters that don't address the outcomes they should are the v1.2.x → v1.2.2 Codex-bug class. The check is a cheap surface heuristic; the proper test is dogfood installation on the target platform.
+
+**v1.10 amendment:** Step 1 (existing-install discovery) was promoted from a spec-prescribed mechanism to a Tier 2 outcome in v1.10; adapters MUST now describe their platform's discovery mechanism. The check scans for the discovery outcome alongside Steps 5/6/7.
 
 ---
 
@@ -815,7 +821,7 @@ The reference implementation is the `a3ip` CLI distributed via [PyPI](https://py
 
 **Rationale:** The install/upgrade/uninstall lifecycle is incomplete without uninstall. Packages predating v1.10 SHOULD add the section on their next version bump; new packages MUST add it. The check is a warning in v1.10 (gentle adoption) and is planned to become an error in v2.0, the same trajectory as Checks 11/12/13.
 
-**Companion check on adapters:** Check 11 (Adapter outcome coverage) is extended in v1.10 to scan both `install-skill.md` and `uninstall-skill.md` per platform. The (platform, outcome) coverage matrix is checked against the install outcomes (Steps 5/6/7) for the install adapter and the uninstall outcomes (Steps UN3/UN4/UN5) for the uninstall adapter.
+**Companion check on adapters:** Check 11 (Adapter outcome coverage) is extended in v1.10 to scan both `install-skill.md` and `uninstall-skill.md` per platform. The (platform, outcome) coverage matrix is checked against the install outcomes (Steps 1, 5, 6, 7) for the install adapter and the uninstall outcomes (Steps UN1, UN3, UN4, UN5) for the uninstall adapter.
 
 ---
 
@@ -1029,6 +1035,7 @@ configuration:
     storage: keychain
     placeholder: "ghp-xxxx or glpat-xxxx"
     when: before
+    preserve_on_uninstall: true        # credential — keep across uninstall to avoid re-issuing
 
   - key: install_dir
     label: "Installation directory"
@@ -1037,6 +1044,7 @@ configuration:
     required: true
     placeholder: "C:\\Users\\you\\.claude\\code-review"
     when: before
+    preserve_on_uninstall: false       # meaningless after uninstall — purge silently
 
   - key: reviewers
     label: "Default reviewers"
@@ -1045,6 +1053,7 @@ configuration:
     required: true
     placeholder: "@username"
     when: before
+    preserve_on_uninstall: ask         # user-curated list — confirm at uninstall time
 
   - key: teams_access_token
     label: "Teams Access Token"
@@ -1057,6 +1066,7 @@ configuration:
     refresh: on_expiry
     refresh_note: "Tokens expire after ~1 hour of inactivity."
     refresh_script: auth_teams
+    preserve_on_uninstall: true        # OAuth token — keep so re-install does not re-prompt
 
 # ─── Platform compatibility ───────────────
 platforms:
@@ -1073,6 +1083,31 @@ platforms:
 | `never` | Default. Set once at install, never needs updating. |
 | `periodic` | Needs manual update on a recurring basis (e.g. sprint start date). |
 | `on_expiry` | Tied to a credential that expires. Pair with `refresh_script:` to automate renewal. |
+
+### `preserve_on_uninstall:` field on configuration keys (v1.10+)
+
+Declares the package author's policy for what should happen to this config key's value when the user uninstalls the package. The installing AI consults this field during Step UN2 (the Uninstall Plan) and acts accordingly in Step UN6.
+
+| Value | Meaning |
+|---|---|
+| `ask` | Default. The AI asks the user at uninstall time whether to keep or remove this key's value. Use when the right answer depends on the user's situation (a list of project members might or might not be worth keeping). |
+| `true` | The key's value is silently preserved across uninstall. Use for hard-earned credentials and tokens that would be friction to re-issue (API tokens, OAuth refresh tokens). A future re-install reuses the preserved value without re-prompting. |
+| `false` | The key's value is silently purged at uninstall. Use for values that are meaningless after the package is gone (the install directory path itself, install timestamps, transient state). |
+
+If the field is omitted, the AI MUST treat the key as `ask`. This preserves pre-v1.10 behavior — older packages without per-key annotations still uninstall correctly; the AI simply prompts for every key.
+
+The field applies regardless of the `storage:` location. A key stored in the OS keychain with `preserve_on_uninstall: false` is removed from the keychain at uninstall; a key stored in `config.json` with `preserve_on_uninstall: true` survives even when the rest of `config.json` is purged (the AI rewrites `config.json` containing only the preserved keys).
+
+**Worked example — a single `config.json` after the user uninstalls a package whose `api_token` is `preserve_on_uninstall: true`, `reviewers` was answered "preserve" at the prompt, and `install_dir` was `preserve_on_uninstall: false`:**
+
+```json
+{
+  "api_token": "ghp-...",
+  "reviewers": ["@alice", "@bob"]
+}
+```
+
+The `install_dir` key is gone; everything else the user wanted kept survives.
 
 ---
 
@@ -1185,16 +1220,20 @@ package: ai-code-review-flow
 *Tier: 2 (required outcome — adapter procedure)*
 
 After this step, the AI MUST know whether a prior installation of this package
-exists on the host. The detection mechanism depends on the OS (path conventions
-for the config directory) and the AI's tool surface (which file-reading tool is
-idiomatic on the host).
+exists on the host, and if so where its `config_dir` lives.
 
-The default detection target is `installed.json` at the platform-default
-install location (see [Platform Conventions](#platform-conventions)).
-Consult `adapters/os/<host>/file-ops.md` for OS-specific file-read conventions.
+The discovery mechanism is host-runtime-specific — read
+`adapters/runtime/<platform>/install-skill.md` for how to locate prior installs
+on the current platform. The adapter is responsible for whatever lookup is
+idiomatic on its platform (scanning a conventional package home, reading a
+per-runtime index, consulting a system service, following pointer files for
+custom install locations, etc.). The spec does not prescribe a single
+detection path.
 
 - **Not found:** proceed with the full install steps below.
-- **Found:** read its `config_dir` field for the actual install location, then go directly to [## Upgrading](#upgrading).
+- **Found:** the adapter returns the `config_dir` of the existing install. Read
+  `installed.json` at that path for the installed version and any other fields
+  needed downstream, then go directly to [## Upgrading](#upgrading).
 
 ## Plan
 *Tier: 1 (mechanical — required for trust ≥ write-local)*
@@ -1347,12 +1386,17 @@ Tell the user the versions upgraded from and to, and the changes applied.
 
 Triggered when the user says "uninstall <package>", "remove <package>", "get rid of <package>", or equivalent. Uninstall is idempotent — running it on a package whose `installed.json` is already absent is a no-op, not an error.
 
-### Step UN1 — Read installed.json
-*Tier: 1 (mechanical)*
+### Step UN1 — Locate the existing install
+*Tier: 2 (required outcome — adapter procedure)*
 
-Look for `installed.json` at `{{config.install_dir}}/installed.json`. If absent, tell the user there is nothing to uninstall and exit cleanly (Step UN2 onward are skipped). If present, read the `version`, `platform`, `config_dir`, and `install_method` fields — they drive every subsequent step.
+After this step, the AI MUST know whether this package is installed on the host, and if so where its `config_dir` lives.
 
-### Step UN2 — Show the Uninstall Plan and ask
+The discovery mechanism is host-runtime-specific — read `adapters/runtime/<platform>/uninstall-skill.md` for how to locate prior installs on the current platform. This is the symmetric counterpart of INSTALL.md Step 1's discovery; the same adapter knowledge applies (the install adapter and uninstall adapter SHOULD describe the same lookup mechanism, since they are answering the same question from opposite ends of the lifecycle).
+
+- **Not found:** tell the user there is nothing to uninstall and exit cleanly. Steps UN2 onward are skipped.
+- **Found:** the adapter returns the `config_dir` of the existing install. Read `installed.json` at that path and capture `version`, `platform`, `config_dir`, and `install_method` — they drive every subsequent uninstall step.
+
+### Step UN2 — Show the Uninstall Plan and resolve per-key config policy
 *Tier: 1 (mechanical)*
 
 Present an Uninstall Plan that lists, item by item:
@@ -1360,16 +1404,20 @@ Present an Uninstall Plan that lists, item by item:
 - The skill files that will be removed (paths derived per the platform's adapter).
 - The artifacts that will be removed (artifact names and their host-runtime mechanism).
 - Any host-runtime registrations that will be reverted (e.g., on Codex: removal of the `<!-- a3ip:<package>:start --> ... <!-- a3ip:<package>:end -->` block from `~/.codex/AGENTS.md`).
+- The per-key disposition of every configuration value (see below).
 - The `installed.json` file that will be removed.
 
-**Then ask the user explicitly which of two options applies to `{{config.install_dir}}/config.json`:**
+**Resolving the config-key policy.** Walk every entry in the `configuration:` block of `manifest.yaml` and consult its [`preserve_on_uninstall:` field](#preserve_on_uninstall-field-on-configuration-keys-v110):
 
-- **Preserve config.json** — `config.json` is left in place after uninstall. The rest of `install_dir` contents are removed but the user's tokens, project refs, and other configured values survive. A re-install reuses them without re-prompting.
-- **Purge config.json** — the entire `install_dir` is removed, including `config.json`. A re-install will run the full `CONFIGURE.md` wizard again.
+- `true` — silently classified as *preserve*. The user is NOT asked. The plan SHOULD list the key under "values that will be kept" so the user can see what survives.
+- `false` — silently classified as *purge*. The user is NOT asked. The plan SHOULD list the key under "values that will be removed".
+- `ask` (or field omitted) — the AI MUST ask the user, per key, whether to preserve or remove that value. Present each `ask` key as a separate inline question with enough context for the user to answer (the key's `label:` and `description:` from the schema, plus a brief reminder of what's stored). Capture each answer and add it to the plan under preserve or remove accordingly.
 
-The AI MUST NOT default either way. The choice is binary and explicit every time. The plan ends with **Confirm to proceed.**
+After all `ask` keys have been resolved, the plan ends with **Confirm to proceed.**
 
 If the user declines confirmation, the AI aborts. No files are removed, no registrations are reverted, the original install remains intact.
+
+The resolved per-key decisions (preserve vs. purge for every key) carry forward to Step UN6, which applies them.
 
 ### Step UN3 — Make skills un-discoverable to the host runtime
 *Tier: 2 (required outcome — adapter procedure)*
@@ -1383,7 +1431,7 @@ The exact mechanism varies: removing files from a skills directory, removing a m
 
 After this step, the host runtime MUST NOT surface any artifact this package created in install Step 6. On a runtime with a first-class artifact registry (e.g., Cowork's `mcp__cowork__list_artifacts` / `delete_artifact`), this means calling the platform's deletion mechanism. On a runtime without an artifact registry (e.g., Codex, where artifacts degrade to markdown files), this means removing the markdown file(s).
 
-If the user chose **Preserve config.json** in Step UN2, artifacts that contain ONLY persisted state (no fresh runtime-generated content) MAY be preserved at the AI's discretion. The default is to remove artifacts unconditionally; the adapter MAY override if the artifact represents user data the user would want to keep.
+Artifacts that contain ONLY persisted state (no fresh runtime-generated content) MAY be preserved at the AI's discretion when at least one configuration key was resolved to *preserve* in Step UN2 — the package's user-facing state was clearly meant to survive, and an artifact that just reflects that state can survive with it. The default is to remove artifacts unconditionally; the adapter MAY override if the artifact represents user data the user would want to keep.
 
 ### Step UN5 — Make protocols no longer invocable
 *Tier: 2 (required outcome — adapter procedure)*
@@ -1393,22 +1441,31 @@ After this step, the host runtime MUST NOT recognize this package's protocol tri
 ### Step UN6 — Remove install_dir contents
 *Tier: 1 (mechanical)*
 
-Apply the choice the user made in Step UN2:
+Apply the per-key decisions resolved in Step UN2:
 
-- If **Preserve config.json**: delete every file in `{{config.install_dir}}` EXCEPT `config.json`. Subdirectories are removed in full.
-- If **Purge config.json**: delete `{{config.install_dir}}` and all its contents recursively, including `config.json`.
+1. **Partition the resolved decisions.** From Step UN2 the AI holds, for every configuration key, a disposition of either *preserve* or *purge*.
+
+2. **Rewrite `config.json`.** Read the current `{{config.install_dir}}/config.json`. Construct a new version that contains ONLY the keys whose disposition is *preserve*. Keys whose disposition is *purge* are dropped. If the resulting object is empty (every key was purged, or the package had no `config.json` keys), the file is removed entirely. Otherwise, write the trimmed object back to `{{config.install_dir}}/config.json`.
+
+3. **Apply equivalent removal to non-file storages.** For each key whose disposition is *purge* and whose `storage:` field is something other than `config-file` (e.g., `keychain`), remove the value from that storage too. Read `adapters/runtime/<platform>/uninstall-skill.md` for the platform's keychain/credential-removal mechanism if applicable.
+
+4. **Remove every other file in `{{config.install_dir}}`.** Delete all files and subdirectories in the install directory EXCEPT `config.json` (if it survived step 2) and `installed.json`. Subdirectories like `scripts/` are removed in full.
+
+5. **If `config.json` did not survive and no other preserved files exist**, the install directory itself becomes empty except for `installed.json`. That is the normal "clean uninstall" end-state; the directory is removed in Step UN7 alongside `installed.json`.
 
 The `installed.json` file is NOT removed in this step — it survives to Step UN7 so that the uninstall remains observable until the last step lands.
 
 ### Step UN7 — Remove installed.json
 *Tier: 1 (mechanical)*
 
-Remove `{{config.install_dir}}/installed.json` (if it still exists after Step UN6 — under **Purge**, it was removed with the directory). After this step, INSTALL.md Step 1 (existing-installation check) returns "no install" on subsequent runs, making the uninstall idempotent.
+Remove `{{config.install_dir}}/installed.json`. After this step, INSTALL.md Step 1 / Step UN1 (existing-installation discovery) returns "no install" on subsequent runs, making the uninstall idempotent.
+
+If, after `installed.json` is removed, the install directory is empty (no preserved `config.json`, no other preserved files), the AI SHOULD remove the empty install directory as well. If preserved values remain (a trimmed `config.json`, for example), the install directory survives so the user can find them.
 
 ### Step UN8 — Confirm to the user
 *Tier: 1 (mechanical)*
 
-Tell the user the uninstall completed. Name (1) the version that was uninstalled, (2) which option they chose for config.json (preserved vs. purged), (3) where preserved data lives if any (typically `{{config.install_dir}}/config.json`), and (4) any leftover state the user may want to know about (e.g., on Codex, mention that the AGENTS.md stanza was removed and the file's other content is unchanged).
+Tell the user the uninstall completed. Name (1) the version that was uninstalled, (2) which configuration keys were preserved (by name) and where the preserved values live (typically a trimmed `config.json` at the original config directory, plus any keychain entries that survived), (3) which keys were purged, and (4) any leftover state the user may want to know about (e.g., on Codex, mention that the AGENTS.md stanza was removed and the file's other content is unchanged).
 ```
 
 ### `## Plan` section rules
@@ -1421,10 +1478,11 @@ Tell the user the uninstall completed. Name (1) the version that was uninstalled
 
 ### `## Uninstalling` section rules
 
-- Steps UN1 and UN2 are always Tier 1. Step UN2 (the Uninstall Plan) MUST present the user with an explicit binary choice for `config.json` (preserve or purge). No default is permitted.
+- Step UN1 is Tier 2 (required outcome — adapter procedure). It is the symmetric counterpart of INSTALL.md Step 1; both use the runtime adapter to locate prior installs on the host. The spec does NOT prescribe a fixed lookup path (e.g., a platform-default directory) — that knowledge lives in `adapters/runtime/<platform>/uninstall-skill.md`.
+- Step UN2 is Tier 1. The Uninstall Plan MUST walk the `configuration:` block of `manifest.yaml` and resolve a preserve-or-purge disposition for every key, using each key's `preserve_on_uninstall` field. Keys with `preserve_on_uninstall: true` are silently preserved; keys with `false` are silently purged; keys with `ask` (or no annotation) trigger a per-key prompt to the user. The plan ends with **Confirm to proceed.**
 - Steps UN3, UN4, UN5 are always Tier 2 (required outcome — adapter procedure). Each is the symmetric un-doing of its install counterpart (Steps 5/6/7).
-- Steps UN6, UN7, UN8 are always Tier 1. Order matters: install_dir contents go first (UN6), then installed.json (UN7), then user-facing confirmation (UN8). Uninstalls that fail mid-flow leave installed.json in place, so the next run can resume.
-- Uninstall is idempotent: running it on a package whose installed.json is absent is a no-op (Step UN1 exits cleanly), not an error.
+- Steps UN6, UN7, UN8 are always Tier 1. Order matters: `install_dir` contents are reconciled first (UN6 — rewrite `config.json` keeping only preserved keys, remove non-config files), then `installed.json` (UN7), then user-facing confirmation (UN8). Uninstalls that fail mid-flow leave `installed.json` in place, so the next run can resume.
+- Uninstall is idempotent: running it on a package whose `installed.json` cannot be located by the adapter is a no-op (Step UN1 exits cleanly), not an error.
 - The uninstall flow does NOT have a `## Plan` block of its own — Step UN2 serves the same confirmation role and replaces it.
 
 ### Tier marker conventions
@@ -1745,7 +1803,7 @@ Packages declare `min_a3ip_spec:` in their manifest to signal which spec feature
 | `1.7` | 2026-05-16 | Two-tier adapter model (`adapters/os/{windows,posix}/` × `adapters/runtime/<name>/`); Check 10 (INSTALL.md spec compliance) |
 | `1.8` | 2026-05-19 | INSTALL.md tool-agnostic language; `installed.json` schema formalized with optional fields; `adapters/runtime/codex/` recognized; cross-product tool-selection table relocated to `TOOL-AUTHORS.md` |
 | `1.9` | 2026-05-21 | Re-alignment to three-tier concept: INSTALL.md Tier 2 steps re-framed as outcomes (Steps 5/6/7); tier markers on step headers; new "Writing Adapter Documents" section formalizes adapters as Tier 3 platform-knowledge; Platform Context Detection as Tier 3 semantic; Validation reconciled to 10 checks plus three new advisory warnings (Checks 11/12/13). All backward-compatible. Uninstall deferred to v1.10. |
-| `1.10` | 2026-05-24 | Uninstall lifecycle: new `## Uninstalling` section in the INSTALL.md template with Tier-marked Steps UN1–UN8; `adapters/runtime/<X>/uninstall-skill.md` as a normative companion to `install-skill.md`; "Writing Adapter Documents" extended with the both-direction coverage rule; config.json preserve-vs-purge is always-asked in Step UN2 (no default); new Check 14 (warning) for INSTALL.md uninstall coverage; Checks 11 and 13 extended to scan both install and uninstall adapter files. All backward-compatible. |
+| `1.10` | 2026-05-24 | Uninstall lifecycle: new `## Uninstalling` section in the INSTALL.md template with Tier-marked Steps UN1–UN8; `adapters/runtime/<X>/uninstall-skill.md` as a normative companion to `install-skill.md`; "Writing Adapter Documents" extended with the both-direction coverage rule; existing-install discovery (INSTALL.md Step 1 / Uninstall Step UN1) promoted to Tier 2 outcome — runtime adapters describe HOW; new `preserve_on_uninstall: true \| false \| "ask"` field on configuration schema keys (default `"ask"`) for author-declared per-key uninstall policy; new Check 14 (warning) for INSTALL.md uninstall coverage; Checks 11 and 13 extended to scan both install and uninstall adapter files. All backward-compatible. |
 
 All packages authored under v1.0–v1.9 remain fully valid under v1.10.
 
