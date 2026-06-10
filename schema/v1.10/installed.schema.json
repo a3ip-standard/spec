@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a3ip.dev/schema/v1.10/installed.json",
+  "title": "A3IP installed.json",
+  "description": "JSON Schema for the per-install record file specified by A3IP v1.10. installed.json is written by the install AI to the package's config_dir immediately after a successful install or upgrade; it is the machine-readable record of what version is installed and where. Published at https://a3ip.dev/schema/v1.10/installed.json. Schema is intentionally permissive: readers MUST tolerate unknown fields (the spec permits future versions to add optional fields without breaking existing readers).",
+  "type": "object",
+  "required": ["package", "version", "installed_at", "platform", "a3ip_spec", "config_dir"],
+  "additionalProperties": true,
+
+  "properties": {
+
+    "package": {
+      "type": "string",
+      "description": "Package name. MUST match the `name` field in the package's manifest.yaml.",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "examples": ["ai-code-review-flow", "a3ip-creator"]
+    },
+
+    "version": {
+      "type": "string",
+      "description": "Installed package version. SemVer (MAJOR.MINOR.PATCH).",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "examples": ["1.4.1", "3.0.0"]
+    },
+
+    "installed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp of this install or upgrade. Updated on every upgrade.",
+      "examples": ["2026-06-06T14:32:00Z"]
+    },
+
+    "platform": {
+      "type": "string",
+      "description": "AI runtime this install lives on. Values match the spec's platform-id convention.",
+      "examples": ["cowork", "claude-code", "codex", "cursor"]
+    },
+
+    "a3ip_spec": {
+      "type": "string",
+      "description": "A3IP spec version used for this install. Reflects the spec version the install AI followed, not necessarily the package's min_a3ip_spec.",
+      "pattern": "^\\d+\\.\\d+$",
+      "examples": ["1.10"]
+    },
+
+    "config_dir": {
+      "type": "string",
+      "description": "Absolute path to the directory containing this install's config.json, installed.json, and any other per-install state. Equals the user's `install_dir` config value after path expansion.",
+      "examples": ["C:/Users/jane/.claude/packages/ai-code-review-flow", "/home/jane/.codex/packages/ai-code-review-flow"]
+    },
+
+    "upgraded_from": {
+      "type": "string",
+      "description": "Previous version, if this was an upgrade. Omit on fresh installs. Readers tolerate absence.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "examples": ["1.4.0"]
+    },
+
+    "install_method": {
+      "type": "string",
+      "description": "Runtime-specific install path tag. Used by upgrade flows to choose the right re-install route. Known values include 'cowork-skill' (Cowork Personal Skills UI flow) and 'generic-copy' (file copy into a skills folder, used by Codex / Claude Code). New runtimes may define new values; readers MUST tolerate unknown values.",
+      "examples": ["cowork-skill", "generic-copy"]
+    },
+
+    "registry_source": {
+      "type": "string",
+      "description": "Path or URL of the registry this package was installed from. Used by check-for-updates flows. Omit if the install came from a local .a3ip.bundle file.",
+      "examples": ["https://raw.githubusercontent.com/a3ip-standard/packages/main/registry.yaml"]
+    },
+
+    "source_bundle": {
+      "type": "string",
+      "description": "Absolute path to the .a3ip.bundle file used for this install. Useful for audit trail and for re-installs without re-downloading. Omit if the install came directly from a registry URL.",
+      "examples": ["C:/Users/jane/Downloads/ai-code-review-flow-v1.4.1.a3ip.bundle"]
+    },
+
+    "workspace_dir": {
+      "type": "string",
+      "description": "Absolute path to the user's project workspace at install time, if the package interacts with workspace-local files. Omit for packages with no workspace coupling.",
+      "examples": ["C:/Users/jane/projects/my-app"]
+    },
+
+    "backup_dir": {
+      "type": "string",
+      "description": "Absolute path to a backup the install adapter created before overwriting prior package state. Enables rollback. Omit on fresh installs.",
+      "examples": ["C:/Users/jane/.codex/backups/ai-code-review-flow-20260606T143200Z"]
+    }
+  }
+}
