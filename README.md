@@ -3,7 +3,7 @@
 
 > **A3IP is a permission-aware package format for portable AI agent workflows** — install complete workflows into Claude Code, Codex, Cursor, or Copilot the way you'd install a Docker container.
 
-[![Spec](https://img.shields.io/badge/spec-v1.5-blue)](docs/A3IP-SPEC-v1.5.md)
+[![Spec](https://img.shields.io/badge/spec-v1.10-blue)](docs/A3IP-SPEC-v1.10.md)
 [![License: CC BY 4.0](https://img.shields.io/badge/spec-CC%20BY%204.0-lightgrey)](LICENSE-SPEC.md)
 [![CLI](https://img.shields.io/badge/pip%20install-a3ip-green)](https://pypi.org/project/a3ip)
 
@@ -46,13 +46,13 @@ One bundle file. Any A3IP-compatible AI. No shell scripts, no manual setup, no g
 A `manifest.yaml` for a code review workflow:
 
 ```yaml
-$schema: https://a3ip.dev/schema/v1.5/manifest.json
+$schema: https://a3ip.dev/schema/v1.10/manifest.json
 
 name: ai-code-review-flow
 version: "1.0.0"
 description: "AI-powered code review workflow for GitHub and GitLab."
-min_a3ip_spec: "1.2"
-trust_level: standard
+min_a3ip_spec: "1.10"
+trust_level: network
 
 permissions:
   filesystem:
@@ -92,6 +92,25 @@ A step from the matching `INSTALL.md`:
 
 ---
 
+## What A3IP IS / IS NOT
+
+**A3IP IS:**
+
+- A **package format** for AI agent workflows — bundle, share, install across platforms.
+- A **permission contract** — every filesystem path, network domain, MCP server, and shell command a package will touch is declared upfront in the manifest. The install AI presents the full plan; the user confirms before anything runs.
+- A **runtime-agnostic install protocol** — the same `.a3ip.bundle` installs identically on Cowork, Claude Code, Codex, or Cursor. Per-platform mechanics (skill registration, artifact creation, scheduled tasks) live in adapter files inside the package; the protocol stays the same.
+- An **open standard** — spec text is CC BY 4.0, reference tooling is Apache 2.0. Anyone can implement, fork, or extend it.
+
+**A3IP IS NOT:**
+
+- **Not a competitor to Cowork Plugins.** Cowork Plugins are Anthropic's first-party packaging surface for Cowork specifically — they bundle skills, connectors, slash commands, and sub-agents into an installable unit governed by Anthropic, native to Cowork's runtime. A3IP is the cross-platform sibling: same packaging discipline, no platform lock-in. The two are complementary — an A3IP package can target Cowork (and does so first-class via the cowork runtime adapter); a future `a3ip export --format cowork-plugin` adapter is planned.
+- **Not a competitor to MCP.** MCP is the wire protocol an AI uses to call tools at runtime. A3IP sits above MCP: it declares which MCPs a workflow needs, installs and configures them as part of the user-confirmed install plan, and then the workflow runs against them.
+- **Not a competitor to SKILL.md.** A3IP packages SKILL.md as a native component type. Every A3IP skill is already SKILL.md-compatible. A3IP adds the install protocol around it.
+- **Not a competitor to Microsoft APM.** APM specifies what agent context to load. A3IP adds the install layer around it — wizard, permissions, plan, confirmation. The two compose.
+- **Not a runtime.** A3IP doesn't execute the workflow; the host AI runtime does. A3IP is the package format and the install contract — nothing more.
+
+---
+
 ## Get started
 
 **Install a package**
@@ -118,35 +137,42 @@ a3ip bundle my-workflow/
 
 ## Platform compatibility
 
-| Platform | Status |
-|---|---|
-| Claude Code | ✅ Supported |
-| GitHub Copilot / Codex | ✅ Supported |
-| Cursor | 🟡 Community support |
-| Windsurf / Codeium | 🟡 Community support |
-| Claude.ai (web) | 🟡 Session install (no persistent state required) |
+| Platform | Status | Notes |
+|---|---|---|
+| Cowork | ✅ Supported | First-class runtime adapter; `.skill` zip install via Personal Skills UI |
+| Codex | ✅ Supported | First-class runtime adapter; AGENTS.md marker registration |
+| Claude Code | ✅ Supported | First-class runtime adapter; auto-discovery from `~/.claude/skills/` |
+| Cursor | 🟡 Community support | Tested platforms list; runtime adapter TBD |
+| Windsurf / Codeium | 🟡 Community support | No adapter shipped yet |
+| Claude.ai (web) | 🟡 Session install | No persistent state required |
 
 A3IP skills are a superset of [SKILL.md](https://agentskills.io) — any A3IP skill is already compatible with every SKILL.md-supporting platform.
 
 ---
 
-## How does this relate to SKILL.md and APM?
+## How does this relate to Cowork Plugins, SKILL.md, MCP, and APM?
 
-| Concept | SKILL.md | APM | A3IP |
-|---|---|---|---|
-| Portable skills | ✅ | ✅ | ✅ adopts SKILL.md exactly |
-| MCP dependency declarations | ❌ | ✅ | ✅ |
-| AI-readable install guide | ❌ | ❌ | ✅ `INSTALL.md` |
-| Installation wizard | ❌ | ❌ | ✅ `CONFIGURE.md` |
-| Permission declarations | ❌ | ❌ | ✅ `permissions:` block |
-| Delta upgrades | ❌ | ❌ | ✅ `CHANGELOG.md` |
-| Plain-text bundle format | ❌ | ❌ | ✅ `.a3ip.bundle` |
+| Concept | Cowork Plugins | SKILL.md | MCP | APM | A3IP |
+|---|---|---|---|---|---|
+| Portable skills | ✅ (Cowork only) | ✅ | — | ✅ | ✅ adopts SKILL.md exactly |
+| Cross-platform portability | ❌ (Cowork-native) | ✅ | ✅ | partial | ✅ |
+| MCP dependency declarations | ✅ | ❌ | self | ✅ | ✅ |
+| AI-readable install guide | partial | ❌ | — | ❌ | ✅ `INSTALL.md` |
+| Installation wizard | ❌ | ❌ | — | ❌ | ✅ `CONFIGURE.md` |
+| Permission declarations | partial | ❌ | — | ❌ | ✅ `permissions:` block |
+| Delta upgrades | ✅ | ❌ | — | ❌ | ✅ `CHANGELOG.md` |
+| Plain-text bundle format | ❌ (.zip) | ❌ | — | ❌ | ✅ `.a3ip.bundle` |
+| Uninstall protocol | ✅ (UI) | ❌ | — | ❌ | ✅ spec v1.10 |
+
+**Cowork Plugins** are Anthropic's first-party packaging surface for Cowork — they bundle skills, connectors, slash commands, sub-agents, and MCP integrations into an installable unit governed by Anthropic. Cowork Plugins are Cowork-native: they install into Cowork's runtime, are loaded by Cowork's plugin system, and depend on Anthropic-owned distribution channels. A3IP is the cross-platform sibling — same packaging discipline, no platform lock-in. An A3IP package can target Cowork (and does so as a first-class runtime via the bundled Cowork adapter), and a future `a3ip export --format cowork-plugin` adapter will let A3IP packages publish to Cowork's plugin marketplace.
 
 **MCP** connects an AI to tools — file systems, databases, APIs. A3IP sits above that: it packages a complete workflow that *uses* those tools, with an explicit list of which MCP servers it requires declared in the manifest. Installing an A3IP package can include configuring MCP connections.
 
 **Microsoft APM** manages agent context dependencies. A3IP adds what APM doesn't have: a configuration wizard, a user-confirmed install plan, and explicit permission declarations before anything runs. The two are complementary — an APM manifest can live inside an A3IP package as a dependency, and an A3IP package can reference APM context blocks.
 
-A3IP is a **superset** of both SKILL.md and APM-compatible manifest blocks. Existing skills and APM packages remain valid inside A3IP without modification.
+**SKILL.md** is the open standard for describing a single skill's invocation contract. A3IP adopts it as a native component type: every A3IP skill is already SKILL.md-compatible without modification. A3IP adds packaging + install + uninstall around it.
+
+A3IP is a **superset** of SKILL.md and APM-compatible manifest blocks, and a **complement** to Cowork Plugins and MCP. Existing skills, APM packages, and Cowork Plugin internals remain valid inside A3IP. See [COMPATIBILITY.md](COMPATIBILITY.md) for the full detail.
 
 ---
 
@@ -154,8 +180,8 @@ A3IP is a **superset** of both SKILL.md and APM-compatible manifest blocks. Exis
 
 | | |
 |---|---|
-| [Spec v1.5](docs/A3IP-SPEC-v1.5.md) | The canonical format reference |
-| [JSON Schema](https://a3ip.dev/schema/v1.5/manifest.json) | For IDE validation and tooling |
+| [Spec v1.10](docs/A3IP-SPEC-v1.10.md) | The canonical format reference |
+| [JSON Schemas](https://a3ip.dev/schema/v1.10/manifest.json) | manifest + installed.json — for IDE validation and tooling |
 | [Package gallery](https://a3ip.dev/packages) | Browse installable workflows |
 | [CLI reference](https://github.com/a3ip-standard/cli) | `pip install a3ip` |
 | [Creator tool](https://github.com/a3ip-standard/creator) | Scaffold and publish packages |
@@ -172,4 +198,4 @@ A3IP is a **superset** of both SKILL.md and APM-compatible manifest blocks. Exis
 
 ---
 
-*A3IP Specification v1.5 · © 2026 Maksym Prydorozhko · [a3ip.dev](https://a3ip.dev)*
+*A3IP Specification v1.10 · © 2026 Maksym Prydorozhko · [a3ip.dev](https://a3ip.dev)*
