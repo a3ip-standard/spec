@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://a3ip.dev/schema/v1.5/manifest.json",
+  "$id": "https://a3ip.dev/schema/v1.5/manifest.schema.json",
   "title": "A3IP Manifest",
-  "description": "JSON Schema for A3IP manifest.yaml — AI Infrastructure Installation Package specification v1.5. Published at https://a3ip.dev/schema/v1.5/manifest.json",
+  "description": "JSON Schema for A3IP manifest.yaml — AI Infrastructure Installation Package specification v1.5. Published at https://a3ip.dev/schema/v1.5/manifest.schema.json",
   "type": "object",
   "required": ["name", "version"],
   "additionalProperties": false,

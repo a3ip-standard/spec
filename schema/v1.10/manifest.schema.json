@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://a3ip.dev/schema/v1.10/manifest.json",
+  "$id": "https://a3ip.dev/schema/v1.10/manifest.schema.json",
   "title": "A3IP Manifest",
-  "description": "JSON Schema for A3IP manifest.yaml — AI Infrastructure Installation Package specification v1.10. Published at https://a3ip.dev/schema/v1.10/manifest.json. Extends v1.5 with: dependencies.tools (Python / CLI / system-tool dependencies); auth_flows (multi-step OAuth/PAT/token flows); preserve_on_uninstall per configuration key (v1.10 uninstall lifecycle); platforms as a flat list (in addition to the v1.5 platforms.tested object shape).",
+  "description": "JSON Schema for A3IP manifest.yaml — AI Infrastructure Installation Package specification v1.10. Published at https://a3ip.dev/schema/v1.10/manifest.schema.json. Extends v1.5 with: dependencies.tools (Python / CLI / system-tool dependencies); auth_flows (multi-step OAuth/PAT/token flows); preserve_on_uninstall per configuration key (v1.10 uninstall lifecycle); platforms as a flat list (in addition to the v1.5 platforms.tested object shape).",
   "type": "object",
   "required": ["name", "version"],
   "additionalProperties": false,

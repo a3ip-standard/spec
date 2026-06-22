@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://a3ip.dev/schema/v1.10/installed.json",
+  "$id": "https://a3ip.dev/schema/v1.10/installed.schema.json",
   "title": "A3IP installed.json",
-  "description": "JSON Schema for the per-install record file specified by A3IP v1.10. installed.json is written by the install AI to the package's config_dir immediately after a successful install or upgrade; it is the machine-readable record of what version is installed and where. Published at https://a3ip.dev/schema/v1.10/installed.json. Schema is intentionally permissive: readers MUST tolerate unknown fields (the spec permits future versions to add optional fields without breaking existing readers).",
+  "description": "JSON Schema for the per-install record file specified by A3IP v1.10. installed.json is written by the install AI to the package's config_dir immediately after a successful install or upgrade; it is the machine-readable record of what version is installed and where. Published at https://a3ip.dev/schema/v1.10/installed.schema.json. Schema is intentionally permissive: readers MUST tolerate unknown fields (the spec permits future versions to add optional fields without breaking existing readers).",
   "type": "object",
   "required": ["package", "version", "installed_at", "platform", "a3ip_spec", "config_dir"],
   "additionalProperties": true,
