@@ -231,47 +231,22 @@ for offline/airgapped scenarios only.
 
 The bundle preamble is the prose block that appears between the closing
 frontmatter `---` and the first `=== FILE: ===` marker. It is the first
-content a receiving AI reads. It is the primary mechanism for anchoring
-the installing AI to the package's install knowledge.
+content a receiving AI reads, and its job is to anchor that AI to the
+package's install knowledge.
 
-**The preamble MUST exist** between the frontmatter and the first FILE
-marker. A bundle without a preamble breaks the install contract for AIs
-that lack prior A3IP familiarity — they have no signal pointing them to
-the install knowledge over the rest of the bundle's content.
+**A bundle MUST include a preamble** between the frontmatter and the
+first FILE marker, and the preamble MUST point the receiving AI at the
+in-bundle install knowledge: `INSTALL.md` and the runtime adapter at
+`adapters/runtime/<platform>/install-skill.md`. Without that pointer, an
+AI lacking prior A3IP familiarity has no signal anchoring it to the
+install contract.
 
-**The preamble MUST direct the receiving AI to:**
-
-1. Read `INSTALL.md` from inside the bundle as the install procedure
-   outline (the file is at `=== FILE: INSTALL.md ===`).
-2. Read `adapters/runtime/<platform>/install-skill.md` for the AI's
-   runtime platform — the platform-specific knowledge for satisfying
-   each Tier 2 outcome in INSTALL.md.
-3. Treat both artifacts as platform knowledge to reason about, NOT as
-   verbatim scripts to execute. Per [Writing Adapter Documents](#writing-adapter-documents),
-   adapters are Tier 3 semantics; INSTALL.md's Tier 2 steps state
-   outcomes; the installing AI's judgment is what applies the knowledge
-   to the specific install in front of it.
-
-**The preamble MUST name the failure mode it exists to prevent:**
-starting an install without first consulting INSTALL.md and the runtime
-adapter. Inferring an install layout from the bundle's `=== FILE: ===`
-markers alone — bypassing the install knowledge — breaks the install
-contract. The markers describe what's in the bundle, not where each file
-goes at runtime; only INSTALL.md and the adapter tell the AI that.
-
-**The preamble MAY also include:** a note that the `a3ip` CLI (or other
-bundlers) build bundles but do NOT install them; a note that install is
-performed by the AI consulting INSTALL.md + the runtime adapter; a
-fallback instruction if INSTALL.md or the runtime adapter cannot be
-located inside the bundle.
-
-**Exact wording is the bundler's choice.** The spec mandates the outcomes
-above, not specific prose. Different bundlers may phrase the preamble
-differently — in different languages, with different framing, or with
-extra rules specific to the bundler's project. As long as a receiving AI
-that reads the preamble can identify INSTALL.md, identify the runtime
-adapter, and understand the knowledge-not-script framing, the preamble
-is conformant.
+How the preamble is phrased is the bundler's choice. The spec mandates
+the outcome (the AI reaches INSTALL.md and the runtime adapter), not
+specific prose, framing, or enumeration. Bundlers may include additional
+context as fits their project: scope notes about the CLI vs. installer
+role, fallback guidance if knowledge artifacts are missing, project- or
+language-specific commentary.
 
 **Format convention.** Preambles are commonly formatted as a comment
 block (lines beginning with `#`) to visually separate them from the FILE
@@ -279,8 +254,9 @@ markers, but the spec does not require this — a bundler may use any
 plain-text format that is unambiguous to identify as a preamble (i.e.
 not parseable as a `=== FILE: ===` marker).
 
-**Reference implementation:** the `a3ip` CLI's `bundle.py` (v1.5.1+)
-emits a preamble that satisfies all of the above MUSTs.
+**Reference implementation:** the `a3ip` CLI's `bundle.py` emits a
+preamble that satisfies the above. Authors implementing a new bundler
+may use its preamble as a starting point and adapt to their project.
 
 ### Generating a bundle
 
@@ -293,30 +269,20 @@ For each file in the package (recursively, sorted by path):
 
 ### Consuming a bundle
 
-When an AI receives a `.a3ip.bundle` file or its contents:
+When an AI receives a `.a3ip.bundle` file or its contents, a conformant
+install reaches these outcomes:
 
-1. Parse the frontmatter to identify the package name and version.
-2. **Read the bundle preamble** — the prose between the closing `---` and
-   the first `=== FILE: ===` marker. It is the AI's primary anchor to the
-   install knowledge inside this bundle.
-3. Split on `=== FILE:` / `=== END FILE ===` delimiters to extract each
-   embedded file. Hold the files as an in-memory map of `{ path → content }`.
-4. **Locate and read `INSTALL.md`** from the in-memory map. It is the
-   install procedure outline — the numbered Steps and their Tier markers.
-5. **Locate and read `adapters/runtime/<platform>/install-skill.md`** for
-   the AI's runtime platform. It is the platform knowledge for satisfying
-   each Tier 2 outcome named in INSTALL.md.
-6. Apply judgment to install. INSTALL.md's outcomes and the adapter's
-   conventions are knowledge to reason about, not scripts to execute
-   verbatim. Step 1 (existing-install discovery) typically runs before
-   any side-effecting action.
-7. Write files to disk only when installation explicitly requires it.
+- The package's frontmatter, preamble, and embedded files are parsed.
+- The install knowledge inside the bundle — `INSTALL.md` and the relevant
+  `adapters/runtime/<platform>/install-skill.md` — is read and applied
+  before any side-effecting action.
+- Files are written to disk only as INSTALL.md and the adapter direct.
 
-The bundle's file structure alone does NOT tell the installing AI where
-each file goes at runtime. INSTALL.md and the runtime adapter do. An AI
-that skips Steps 4 and 5 above and infers install layout from the
-`=== FILE: ===` markers alone is improvising — and breaks the install
-contract.
+How the AI sequences the parse, what tools it uses, and how it recovers
+from a malformed delimiter or a missing knowledge artifact are
+implementation. The contract is that the AI installs from the bundle's
+install knowledge, not by inferring layout from the file structure
+alone.
 
 ---
 
@@ -698,6 +664,8 @@ Authors writing adapter content should:
 4. **Avoid code as the section body.** If an adapter section is mostly code with a sentence of context, it's script-shaped. Rule of thumb: prose should outweigh code. [Check 13](#check-13--adapter-knowledge-shape-v19) enforces this coarsely.
 
 5. **Describe variation, not error cases.** "On Windows hosts, paths use backslash" is convention. "If you see a 'path not found' error, try X" is troubleshooting — useful, but should go in a Troubleshooting section, not in the main convention prose.
+
+6. **Make the mechanism articulable.** A reader of the adapter section should be able to summarize the platform mechanism in one sentence after reading it — "files in `~/.codex/skills/` are loaded because `AGENTS.md` references them," "skills in the Personal Skills folder are auto-discovered by Cowork's UI." If the section reads as instructions without surfacing the underlying mechanism, the AI gets a procedure but loses the model — and cannot recover when the procedure fails for reasons outside the documented path. Articulability is the test of whether the adapter is teaching, not just dictating.
 
 ### When script-shape is unavoidable
 
@@ -1387,12 +1355,6 @@ After this step, the host runtime MUST be able to load each skill in
 on the runtime — consult `adapters/runtime/<your-platform>/install-skill.md`
 for platform conventions and a worked example.
 
-**Verification:** the AI installer should be able to articulate, in one
-sentence, the runtime mechanism that will load the skill (e.g., "files in
-`~/.codex/skills/` are loaded because `AGENTS.md` references them" or
-"skills in the Personal Skills folder are auto-discovered by Cowork's UI").
-If it can't, registration is incomplete.
-
 ## 6. Make artifacts available on the host runtime
 *Tier: 2 (required outcome — adapter procedure)*
 
@@ -1529,19 +1491,22 @@ After this step, the host runtime MUST NOT recognize this package's protocol tri
 ### Step UN6 — Remove install_dir contents
 *Tier: 1 (mechanical)*
 
-Apply the per-key decisions resolved in Step UN2:
+After UN6, the following end-state holds:
 
-1. **Partition the resolved decisions.** From Step UN2 the AI holds, for every configuration key, a disposition of either *preserve* or *purge*.
-
-2. **Rewrite `config.json`.** Read the current `{{config.install_dir}}/config.json`. Construct a new version that contains ONLY the keys whose disposition is *preserve*. Keys whose disposition is *purge* are dropped. If the resulting object is empty (every key was purged, or the package had no `config.json` keys), the file is removed entirely. Otherwise, write the trimmed object back to `{{config.install_dir}}/config.json`.
-
-3. **Apply equivalent removal to non-file storages.** For each key whose disposition is *purge* and whose `storage:` field is something other than `config-file` (e.g., `keychain`), remove the value from that storage too. Read `adapters/runtime/<platform>/uninstall-skill.md` for the platform's keychain/credential-removal mechanism if applicable.
-
-4. **Remove every other file in `{{config.install_dir}}`.** Delete all files and subdirectories in the install directory EXCEPT `config.json` (if it survived step 2) and `installed.json`. Subdirectories like `scripts/` are removed in full.
-
-5. **If `config.json` did not survive and no other preserved files exist**, the install directory itself becomes empty except for `installed.json`. That is the normal "clean uninstall" end-state; the directory is removed in Step UN7 alongside `installed.json`.
-
-The `installed.json` file is NOT removed in this step — it survives to Step UN7 so that the uninstall remains observable until the last step lands.
+- `{{config.install_dir}}/config.json` (if present) contains only the
+  configuration keys whose disposition from UN2 is *preserve*. If the set
+  of preserved keys is empty, the file is gone.
+- For any preserved key whose `storage:` field is something other than
+  `config-file` (e.g., `keychain`), the value remains in that storage.
+  For any purged key with non-`config-file` storage, the value has been
+  removed from that storage. The runtime adapter is the authority on the
+  per-storage mechanism.
+- No other files from the package install remain in
+  `{{config.install_dir}}`. Subdirectories the install side created
+  (`scripts/`, generated state, etc.) are gone.
+- `installed.json` is untouched in this step. It survives to UN7 so that
+  the uninstall stays observable until the last step lands; if UN6 fails
+  partway, the next run sees `installed.json` and resumes.
 
 ### Step UN7 — Remove installed.json
 *Tier: 1 (mechanical)*
