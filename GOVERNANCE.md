@@ -1,7 +1,7 @@
 # A3IP Governance
 
-How the A3IP specification, reference toolchain, and public registry
-are maintained. Read this before opening an issue, proposing a change,
+How the A3IP specification, reference toolchain, and reference package
+registry are maintained. Read this before opening an issue, proposing a change,
 or asking who decides what.
 
 This document is honest about the current stage of the project: A3IP
@@ -14,7 +14,7 @@ from the current-state model, both are stated explicitly.
 
 ## Who maintains this
 
-**Maksym Prydorozhko** ([@maksymprydorozhko](https://github.com/maksymprydorozhko)) — author of the specification, maintainer of the reference toolchain (`a3ip` CLI, `a3ip-creator`), and current sole gatekeeper of the public package registry.
+**Maksym Prydorozhko** ([@maksymprydorozhko](https://github.com/maksymprydorozhko)) — author of the specification, maintainer of the reference toolchain (`a3ip` CLI, `a3ip-creator`), and current sole gatekeeper of the project's reference package registry.
 
 Contact: open a GitHub issue in the relevant repo (see [Repositories](#repositories) below). Direct email is intentionally not the channel — issue tracking keeps the project's record public.
 
@@ -50,9 +50,11 @@ The reference toolchain is **versioned independently** of the spec. CLI behavior
 
 **Process:** open a PR in the relevant repo ([`a3ip-standard/cli`](https://github.com/a3ip-standard/cli) or [`a3ip-standard/creator`](https://github.com/a3ip-standard/creator)). Maintainer reviews. If the change implies a spec change too, the spec PR happens first.
 
-### New packages in the public registry
+### New packages in the reference registry
 
-Anyone can submit a package to the public registry at [`a3ip-standard/packages`](https://github.com/a3ip-standard/packages).
+A3IP is **registry-neutral**: the standard defines packages and how they install, not how they are distributed. [`a3ip-standard/packages`](https://github.com/a3ip-standard/packages) is the project's **reference registry** — one registry among possibly many. Anyone, including AI-platform vendors, can host their own A3IP registry; publishing here is never required for a package to be valid, it simply lists the package in the maintained reference gallery.
+
+Anyone can submit a package to the reference registry.
 
 **Process:** see [CONTRIBUTING.md](https://github.com/a3ip-standard/packages/blob/main/CONTRIBUTING.md) in that repo. Acceptance criteria: passes `a3ip validate` with zero errors, has a README explaining what the package does, is not company-specific (no internal URLs, no private API endpoints, no hardcoded team names).
 
@@ -104,7 +106,7 @@ Versioned independently. Sample A (`ai-code-review-flow`), Sample B (`ai-researc
 
 **Trademark "A3IP":** the name "A3IP" is in the process of trademark registration (EUIPO; USPTO filing planned post-launch). The pending trademark covers the project identity — implementations may describe themselves as "A3IP-compatible" without restriction, but should not use "A3IP" in a way that implies official endorsement or affiliation. See [COMPATIBILITY.md](COMPATIBILITY.md) for the trademark acknowledgements covering other standards we reference.
 
-**Logo:** TBD. Will be released under the same trademark scope as the name.
+**Logo:** the A3IP suitcase mark, released under the same trademark scope as the name.
 
 ---
 
@@ -127,7 +129,7 @@ There is no escalation path beyond the maintainer until the future-state steerin
 | [`a3ip-standard/spec`](https://github.com/a3ip-standard/spec) | The spec text, JSON Schemas, COMPATIBILITY, GOVERNANCE, README | Maksym Prydorozhko |
 | [`a3ip-standard/cli`](https://github.com/a3ip-standard/cli) | The `a3ip` Python CLI (PyPI: `pip install a3ip`) | Maksym Prydorozhko |
 | [`a3ip-standard/creator`](https://github.com/a3ip-standard/creator) | The reference authoring tool (`a3ip-creator` skill) | Maksym Prydorozhko |
-| [`a3ip-standard/packages`](https://github.com/a3ip-standard/packages) | Public package registry: bundles + `registry.yaml` | Maksym Prydorozhko |
+| [`a3ip-standard/packages`](https://github.com/a3ip-standard/packages) | Reference package registry: bundles + `registry.yaml` | Maksym Prydorozhko |
 
 ---
 
