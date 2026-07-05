@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A3IP — package an AI workflow once, install it anywhere</title>
+<meta name="description" content="A3IP (pronounced 'ay-trip') is a permission-aware package format for portable AI agent workflows. Hand one bundle to your AI assistant and it installs the whole workflow on Claude Code, Codex, Cursor, or Cowork — asking your permission first.">
+<link rel="icon" href="./favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<meta property="og:title" content="A3IP — portable AI agent workflows">
+<meta property="og:description" content="Package an AI workflow once. Any capable AI agent installs it — asking permission first.">
+<meta property="og:image" content="./a3ip-logo-512.png">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --bg:#ffffff; --soft:#f5f7fa; --surface:#ffffff; --border:#e4e8ee;
+    --text:#0d1b2a; --muted:#4a5a6a; --navy:#041d33;
+    --accent:#ff8400; --accent-text:#a85600; --code:#f2f4f7;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0a1420; --soft:#0e1b2b; --surface:#11212f; --border:#21344a;
+      --text:#e6ecf3; --muted:#9fb0c2; --navy:#041d33;
+      --accent:#ff9a2e; --accent-text:#ff9a2e; --code:#0e1b28;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:0 20px}
+  section{padding:56px 0;border-top:1px solid var(--border)}
+  h1,h2,h3{line-height:1.22;font-weight:700}
+  h2{font-size:1.55rem;margin:0 0 8px}
+  .eyebrow{color:var(--accent-text);font-weight:700;letter-spacing:.05em;
+    text-transform:uppercase;font-size:.78rem;margin:0 0 8px}
+  .muted{color:var(--muted)}
+  code,kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9em}
+  /* hero */
+  .hero{text-align:center;padding:60px 0 44px;border-top:none}
+  .logo-tile{display:inline-flex;background:#fff;border-radius:26px;padding:18px;
+    box-shadow:0 6px 30px rgba(4,29,51,.12);border:1px solid var(--border)}
+  .logo-tile img{width:124px;height:124px;display:block}
+  .brandline{margin:20px 0 6px;color:var(--muted);font-weight:600;letter-spacing:.03em}
+  .brandline b{color:var(--text)} .brandline .say{font-style:italic;font-weight:400}
+  .hero h1{font-size:2.4rem;margin:0 0 16px;letter-spacing:-.015em}
+  .lead{font-size:1.16rem;max-width:660px;margin:0 auto 26px;color:var(--muted)}
+  .lead b{color:var(--text)}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:center}
+  .btn{display:inline-block;padding:12px 22px;border-radius:12px;font-weight:700;
+    text-decoration:none;border:1.5px solid transparent;font-size:1rem}
+  .btn-primary{background:var(--accent);color:#041d33}
+  .btn-ghost{border-color:var(--border);color:var(--text);background:var(--surface)}
+  .trust{display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:center;margin:24px 0 0;
+    color:var(--muted);font-size:.86rem}
+  .trust a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border)}
+  .trust b{color:var(--accent-text)}
+  /* pillars + cards */
+  .grid{display:grid;gap:16px}
+  .cols-3{grid-template-columns:repeat(3,1fr)}
+  .cols-2{grid-template-columns:repeat(2,1fr)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px}
+  .card h3{margin:0 0 6px;font-size:1.05rem}
+  .card p{margin:0;color:var(--muted);font-size:.95rem}
+  .tag{display:inline-block;font-size:.72rem;color:var(--muted);border:1px solid var(--border);
+    border-radius:999px;padding:2px 9px;margin:8px 6px 0 0}
+  /* flow */
+  .flow{display:grid;gap:10px;margin-top:14px}
+  .step{display:flex;gap:14px;align-items:flex-start;background:var(--surface);
+    border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+  .step .n{flex:0 0 28px;height:28px;border-radius:8px;background:var(--navy);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+  .step b{display:block}
+  .step .who{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
+    border:1px solid var(--border);border-radius:999px;padding:1px 8px;margin-left:8px;vertical-align:2px}
+  .step span.d{color:var(--muted);font-size:.94rem}
+  /* code */
+  pre{background:var(--code);border:1px solid var(--border);border-radius:12px;
+    padding:16px;overflow:auto;font-size:.88rem;line-height:1.5;margin:12px 0 0}
+  .cap{color:var(--muted);font-size:.9rem;margin:10px 0 0}
+  .two{display:grid;gap:18px;grid-template-columns:1fr 1fr;margin-top:10px}
+  .two h3{margin:0 0 4px}
+  /* compat */
+  .compat{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .chip{border:1px solid var(--border);background:var(--surface);border-radius:999px;
+    padding:7px 14px;font-size:.9rem}
+  .chip .ok{color:var(--accent-text);font-weight:700}
+  footer{padding:40px 0 60px;border-top:1px solid var(--border);color:var(--muted);font-size:.92rem}
+  footer a{color:var(--text);text-decoration:none;border-bottom:1px solid var(--border)}
+  .flinks{display:flex;flex-wrap:wrap;gap:18px;margin-bottom:14px}
+  @media (max-width:680px){
+    .cols-3,.cols-2,.two{grid-template-columns:1fr}
+    .hero h1{font-size:1.85rem} .lead{font-size:1.04rem}
+    section{padding:44px 0}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="logo-tile"><img src="./a3ip-logo.svg" alt="A3IP logo — a suitcase with a travel stamp" width="124" height="124"></span>
+    <p class="brandline"><b>A3IP</b> — AI Infrastructure Installation Package <span class="say">· pronounced &ldquo;ay-trip&rdquo;</span></p>
+    <h1>Package an AI workflow once — install it anywhere.</h1>
+    <p class="lead">A <b>permission-aware package format</b> for portable AI agent workflows. Hand one bundle to your AI assistant and it installs the whole thing on Claude&nbsp;Code, Codex, Cursor, or Cowork — <b>asking your permission first</b>.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="https://github.com/a3ip-standard/packages">Browse packages</a>
+      <a class="btn btn-ghost" href="https://github.com/a3ip-standard/spec/blob/main/docs/A3IP-SPEC-v1.10.md">Read the spec</a>
+    </div>
+    <div class="trust">
+      <span>Spec <b>v1.10</b></span>
+      <span>Open standard · CC&nbsp;BY&nbsp;4.0</span>
+      <span><code>pip install a3ip</code></span>
+      <a href="https://github.com/a3ip-standard">GitHub</a>
+    </div>
+  </header>
+
+  <section id="what">
+    <p class="eyebrow">What is this?</p>
+    <h2>A standard for packaging AI workflows</h2>
+    <p class="muted">You build a great AI workflow on one platform. You send it to a teammate on another — and it breaks: wrong paths, missing MCP setup, config keys with no context, no idea what to run first. Until now there has been no standard way to package an AI workflow so that <em>another</em> AI can install it from scratch, ask the right setup questions, and confirm the permissions it needs before touching anything.</p>
+    <div class="grid cols-3" style="margin-top:22px">
+      <div class="card"><h3>Package format</h3><p>Bundle skills, protocols, scripts, and artifacts into one <code>.a3ip.bundle</code> — shareable and installable across platforms.</p></div>
+      <div class="card"><h3>Permission contract</h3><p>Every filesystem path, network domain, MCP server, and shell command is declared upfront. Your AI shows the full plan; you confirm before anything runs.</p></div>
+      <div class="card"><h3>Runtime-agnostic</h3><p>The same bundle installs identically on Cowork, Claude&nbsp;Code, Codex, or Cursor. Per-platform mechanics live in adapters inside the package.</p></div>
+    </div>
+  </section>
+
+  <section id="show">
+    <p class="eyebrow">Show me</p>
+    <h2>One bundle. Installed by your AI.</h2>
+    <p class="muted">No special support required — any capable AI agent that can read files and follow instructions can install an A3IP package. The bundle describes everything itself.</p>
+    <div class="flow">
+      <div class="step"><div class="n">1</div><div><b>Hand your AI a <code>.a3ip.bundle</code><span class="who">you</span></b><span class="d">A single file — no shell scripts, no manual setup.</span></div></div>
+      <div class="step"><div class="n">2</div><div><b>It reads INSTALL.md &amp; CONFIGURE.md<span class="who">ai</span></b><span class="d">Learns the steps, then asks you the setup questions it needs.</span></div></div>
+      <div class="step"><div class="n">3</div><div><b>It presents the plan + permissions<span class="who">ai</span></b><span class="d">Every step and every permission, upfront — nothing silent.</span></div></div>
+      <div class="step you"><div class="n">4</div><div><b>You confirm → workflow installed<span class="who">you</span></b><span class="d">Nothing runs until you say yes. Then it&rsquo;s set up for your platform.</span></div></div>
+    </div>
+
+    <p class="cap">The permission contract your AI shows you — and waits on — before running a thing:</p>
+    <pre>permissions:
+  network:
+    - domain: api.github.com
+      reason: Read pull requests, post review comments
+  filesystem:
+    - path: ./reviews/
+      access: write
+      reason: Stores generated review reports
+  shell:
+    - command: python3
+      reason: Runs the review script</pre>
+
+    <h3 style="margin:32px 0 0">The reference package gallery</h3>
+    <p class="muted" style="margin-top:4px">Five packages you can install today — each a different shape of workflow.</p>
+    <div class="grid cols-2" style="margin-top:14px">
+      <div class="card"><h3>a3ip-creator</h3><p>Author a new A3IP package from scratch, guided end to end.</p><span class="tag">Cowork</span><span class="tag">Codex</span><span class="tag">Claude Code</span><span class="tag">Cursor</span></div>
+      <div class="card"><h3>ai-code-review-flow</h3><p>Structured GitLab/GitHub code review on a 7-category checklist.</p><span class="tag">Cowork</span><span class="tag">Codex</span><span class="tag">Claude Code</span><span class="tag">Cursor</span></div>
+      <div class="card"><h3>ai-research-workspace</h3><p>Capture papers, log experiments, synthesize findings — all local markdown.</p><span class="tag">Cowork</span><span class="tag">Codex</span><span class="tag">Claude Code</span></div>
+      <div class="card"><h3>ai-standup-assistant</h3><p>A daily standup compiled from your GitHub activity across repos.</p><span class="tag">Cowork</span><span class="tag">Codex</span><span class="tag">Claude Code</span></div>
+      <div class="card"><h3>cowork-backlog</h3><p>A lightweight backlog and read-only Kanban board across projects.</p><span class="tag">Cowork</span><span class="tag">Claude Code</span></div>
+      <div class="card" style="display:flex;align-items:center;justify-content:center"><a class="btn btn-ghost" href="https://github.com/a3ip-standard/packages">See the full gallery →</a></div>
+    </div>
+  </section>
+
+  <section id="start">
+    <p class="eyebrow">How do I start?</p>
+    <h2>Install one, or build your own</h2>
+    <div class="two">
+      <div>
+        <h3>Install a package</h3>
+        <p class="muted">Grab a bundle URL from the gallery and paste it into a conversation with your AI. It reads <code>INSTALL.md</code>, walks you through <code>CONFIGURE.md</code>, and confirms every step before executing.</p>
+        <pre>"Install this A3IP package:
+ https://.../ai-code-review-flow-v1.5.0.a3ip.bundle"</pre>
+      </div>
+      <div>
+        <h3>Create a package</h3>
+        <p class="muted">Scaffold a valid package in seconds with the CLI, validate it against the spec, and produce a distributable bundle.</p>
+        <pre>pip install a3ip
+
+a3ip scaffold my-workflow
+a3ip validate my-workflow/
+a3ip bundle   my-workflow/</pre>
+      </div>
+    </div>
+    <div class="compat">
+      <span class="chip"><span class="ok">✓</span> Cowork</span>
+      <span class="chip"><span class="ok">✓</span> Codex</span>
+      <span class="chip"><span class="ok">✓</span> Claude Code</span>
+      <span class="chip">Cursor · community</span>
+      <span class="chip">SKILL.md-compatible</span>
+    </div>
+  </section>
+
+  <footer>
+    <div class="flinks">
+      <a href="https://github.com/a3ip-standard/spec/blob/main/docs/A3IP-SPEC-v1.10.md">Specification v1.10</a>
+      <a href="https://github.com/a3ip-standard/packages">Package gallery</a>
+      <a href="https://github.com/a3ip-standard/creator">Creator</a>
+      <a href="https://pypi.org/project/a3ip">CLI (PyPI)</a>
+      <a href="https://github.com/a3ip-standard/spec/blob/main/COMPATIBILITY.md">Compatibility</a>
+      <a href="https://github.com/a3ip-standard/spec/blob/main/GOVERNANCE.md">Governance</a>
+    </div>
+    <div>A3IP is an open standard · spec CC&nbsp;BY&nbsp;4.0 · tooling Apache&nbsp;2.0</div>
+  </footer>
+
+</div>
+</body>
+</html>
