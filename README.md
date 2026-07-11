@@ -3,7 +3,7 @@
 
 > **A3IP is a permission-aware package format for portable AI agent workflows** — install complete workflows into Claude Code, Codex, Cursor, or Copilot the way you'd install a Docker container.
 
-[![Spec](https://img.shields.io/badge/spec-v1.10-blue)](docs/A3IP-SPEC-v1.10.md)
+[![Spec](https://img.shields.io/badge/spec-v1.11-blue)](docs/A3IP-SPEC-v1.11.md)
 [![License: CC BY 4.0](https://img.shields.io/badge/spec-CC%20BY%204.0-lightgrey)](LICENSE)
 [![CLI](https://img.shields.io/badge/pip%20install-a3ip-green)](https://pypi.org/project/a3ip)
 
@@ -180,7 +180,7 @@ A3IP is a **superset** of SKILL.md and APM-compatible manifest blocks, and a **c
 
 | | |
 |---|---|
-| [Spec v1.10](docs/A3IP-SPEC-v1.10.md) | The canonical format reference |
+| [Spec v1.11](docs/A3IP-SPEC-v1.11.md) | The canonical format reference |
 | [JSON Schemas](https://a3ip.dev/schema/v1.10/manifest.schema.json) | manifest + installed schemas — for IDE validation and tooling |
 | [Package gallery](https://github.com/a3ip-standard/packages) | Browse installable workflows |
 | [CLI reference](https://github.com/a3ip-standard/cli) | `pip install a3ip` |
@@ -198,4 +198,4 @@ A3IP is a **superset** of SKILL.md and APM-compatible manifest blocks, and a **c
 
 ---
 
-*A3IP Specification v1.10 · © 2026 Maksym Prydorozhko · [a3ip.dev](https://a3ip.dev)*
+*A3IP Specification v1.11 · © 2026 Maksym Prydorozhko · [a3ip.dev](https://a3ip.dev)*
