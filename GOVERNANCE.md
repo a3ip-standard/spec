@@ -133,4 +133,4 @@ There is no escalation path beyond the maintainer until the future-state steerin
 
 ---
 
-*A3IP Specification v1.10 · © 2026 Maksym Prydorozhko · [a3ip.dev](https://a3ip.dev)*
+*A3IP Specification v1.12 · © 2026 Maksym Prydorozhko · [a3ip.dev](https://a3ip.dev)*

@@ -97,6 +97,12 @@
 </style>
 </head>
 <body>
+<div style="background:#041d33;color:#e6ecf3;border-bottom:2px solid #ff8400;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
+  <div style="max-width:880px;margin:0 auto;padding:12px 20px;font-size:.92rem;line-height:1.5">
+    <b style="color:#ff9a2e">Project status — concluded experiment (July 2026).</b>
+    A3IP explored an AI-mediated install protocol for agent workflows. The design works, but the space it aimed at is now covered more maturely by <a href="https://github.com/microsoft/apm" style="color:#ff9a2e;text-decoration:underline">Microsoft APM</a>, an actively maintained dependency manager and installer for agent context. For real use, prefer APM. This site and its repositories remain as an honest, open record; the project is not being developed further.
+  </div>
+</div>
 <div class="wrap">
 
   <header class="hero">
@@ -106,10 +112,10 @@
     <p class="lead">A <b>permission-aware package format</b> for portable AI agent workflows. Hand one bundle to your AI assistant and it installs the whole thing on Claude&nbsp;Code, Codex, Cursor, or Cowork — <b>asking your permission first</b>.</p>
     <div class="cta">
       <a class="btn btn-primary" href="https://github.com/a3ip-standard/packages">Browse packages</a>
-      <a class="btn btn-ghost" href="https://github.com/a3ip-standard/spec/blob/main/docs/A3IP-SPEC-v1.11.md">Read the spec</a>
+      <a class="btn btn-ghost" href="https://github.com/a3ip-standard/spec/blob/main/docs/A3IP-SPEC-v1.12.md">Read the spec</a>
     </div>
     <div class="trust">
-      <span>Spec <b>v1.11</b></span>
+      <span>Spec <b>v1.12</b></span>
       <span>Open standard · CC&nbsp;BY&nbsp;4.0</span>
       <span><code>pip install a3ip</code></span>
       <a href="https://github.com/a3ip-standard">GitHub</a>
@@ -122,20 +128,20 @@
     <p class="muted">You build a great AI workflow on one platform. You send it to a teammate on another — and it breaks: wrong paths, missing MCP setup, config keys with no context, no idea what to run first. Until now there has been no standard way to package an AI workflow so that <em>another</em> AI can install it from scratch, ask the right setup questions, and confirm the permissions it needs before touching anything.</p>
     <div class="grid cols-3" style="margin-top:22px">
       <div class="card"><h3>Package format</h3><p>Bundle skills, protocols, scripts, and artifacts into one <code>.a3ip.bundle</code> — shareable and installable across platforms.</p></div>
-      <div class="card"><h3>Permission contract</h3><p>Every filesystem path, network domain, MCP server, and shell command is declared upfront. Your AI shows the full plan; you confirm before anything runs.</p></div>
-      <div class="card"><h3>Runtime-agnostic</h3><p>The same bundle installs identically on Cowork, Claude&nbsp;Code, Codex, or Cursor. Per-platform mechanics live in adapters inside the package.</p></div>
+      <div class="card"><h3>Permission contract</h3><p>Every filesystem path, network domain, MCP server, and shell command is declared upfront. A3IP doesn't sandbox — your AI is trusted to show the plan and honor it before acting. The value is that the contract is auditable.</p></div>
+      <div class="card"><h3>Runtime-agnostic</h3><p>The same bundle aims to install consistently across Cowork, Claude&nbsp;Code, Codex, and Cursor — the outcome depends on the receiving AI following the protocol. Per-platform mechanics live in adapters inside the package.</p></div>
     </div>
   </section>
 
   <section id="fit">
     <p class="eyebrow">How is it different?</p>
     <h2>It composes with what you already use</h2>
-    <p class="muted">A3IP is not a competitor to SKILL.md, MCP, Cowork Plugins, or APM — it is the install-and-portability layer <em>around</em> them. And it is not a runtime: your AI still runs the workflow; A3IP is the package format and the install contract.</p>
+    <p class="muted">A3IP adopts SKILL.md and composes with MCP and Cowork Plugins. It overlaps heavily with Microsoft APM, which already does portability and installation for developers — A3IP's narrower angle is a conversational, AI-run install. A3IP is not a runtime: your AI still runs the workflow; A3IP is the package format and the install contract.</p>
     <div class="grid cols-2" style="margin-top:20px">
       <div class="card"><h3>vs. SKILL.md</h3><p>A3IP packages SKILL.md as a native component — every A3IP skill already <em>is</em> a SKILL.md. A3IP wraps the install protocol around it.</p></div>
       <div class="card"><h3>vs. MCP</h3><p>MCP is how an AI calls tools at runtime. A3IP sits above it: it declares which MCP servers a workflow needs and sets them up during a permissioned install.</p></div>
       <div class="card"><h3>vs. Cowork Plugins</h3><p>Cowork Plugins are Anthropic&rsquo;s first-party packaging for Cowork. A3IP is the cross-platform sibling — same discipline, no lock-in — and targets Cowork first-class.</p></div>
-      <div class="card"><h3>vs. Microsoft APM</h3><p>APM specifies what agent context to load. A3IP adds the install layer around it — wizard, permissions, plan, confirmation. The two compose.</p></div>
+      <div class="card"><h3>vs. Microsoft APM</h3><p>APM is a mature dependency manager — it resolves, pins, scans, and policy-checks agent context across seven harnesses, and installs it. A3IP's narrower angle is a conversational install the AI runs itself. The overlap is large.</p></div>
     </div>
   </section>
 
@@ -146,7 +152,7 @@
     <div class="flow">
       <div class="step"><div class="n">1</div><div><b>Hand your AI a <code>.a3ip.bundle</code><span class="who">you</span></b><span class="d">A single file — no shell scripts, no manual setup.</span></div></div>
       <div class="step"><div class="n">2</div><div><b>It reads INSTALL.md &amp; CONFIGURE.md<span class="who">ai</span></b><span class="d">Learns the steps, then asks you the setup questions it needs.</span></div></div>
-      <div class="step"><div class="n">3</div><div><b>It presents the plan + permissions<span class="who">ai</span></b><span class="d">Every step and every permission, upfront — nothing silent.</span></div></div>
+      <div class="step"><div class="n">3</div><div><b>It presents the plan + permissions<span class="who">ai</span></b><span class="d">Every step and every permission declared upfront for you to review before it acts.</span></div></div>
       <div class="step you"><div class="n">4</div><div><b>You confirm → workflow installed<span class="who">you</span></b><span class="d">Nothing runs until you say yes. Then it&rsquo;s set up for your platform.</span></div></div>
     </div>
 
@@ -205,7 +211,7 @@ a3ip bundle   my-workflow/</pre>
 
   <footer>
     <div class="flinks">
-      <a href="https://github.com/a3ip-standard/spec/blob/main/docs/A3IP-SPEC-v1.11.md">Specification v1.11</a>
+      <a href="https://github.com/a3ip-standard/spec/blob/main/docs/A3IP-SPEC-v1.12.md">Specification v1.12</a>
       <a href="https://github.com/a3ip-standard/packages">Package gallery</a>
       <a href="https://github.com/a3ip-standard/creator">Creator</a>
       <a href="https://pypi.org/project/a3ip">CLI (PyPI)</a>

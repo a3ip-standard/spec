@@ -30,13 +30,15 @@ The packaging *discipline* is the same: bundle the workflow so a
 recipient can install it cleanly without manual file-shuffling.
 
 **Where A3IP differs.** A3IP is **cross-platform by design**. The same
-`.a3ip.bundle` installs identically on Cowork, Claude Code, Codex, or
-Cursor; runtime-specific install mechanics live in adapter files
-inside the package. A3IP also adds **explicit permission
+`.a3ip.bundle` aims to install consistently across Cowork, Claude
+Code, Codex, and Cursor — the outcome depends on the receiving AI
+following the protocol; runtime-specific mechanics live in adapter
+files inside the package. A3IP also adds **explicit permission
 declarations** (every filesystem path, network domain, MCP server,
-and shell command pre-declared in the manifest, presented to the user
-as an install plan before any side effects fire) and a **normative
-uninstall protocol** with per-key data-preservation policy. Cowork
+and shell command pre-declared in the manifest for the install AI to
+present as a plan — A3IP declares, it does not enforce) and a
+**normative uninstall protocol** with per-key data-preservation
+policy. Cowork
 Plugins handle these implicitly via the Cowork UI and Anthropic's
 trust model; A3IP makes them explicit so the same package can install
 safely on any compliant AI runtime.
@@ -60,33 +62,36 @@ in every A3IP package as part of Creator v3.0's bundled templates.
 
 ## Microsoft APM (Agent Package Manager)
 
-APM specifies what **agent context** to load — which prompts, which
-context blocks, which dependencies. It's positioned as the "npm for
-agents": a way to declare dependencies between agent contexts and
-resolve them at runtime.
+APM is a dependency manager for agent context — the "npm for agents."
+You declare the skills, prompts, instructions, plugins, and MCP
+servers your project needs in one `apm.yml`; `apm install` resolves
+and pins them with a content-hash lockfile, scans them for tampering,
+enforces install-time policy (`apm-policy.yml`), and configures seven
+coding harnesses (Copilot, Claude Code, Cursor, Codex, Gemini,
+Windsurf, OpenCode).
 
 **Where A3IP and APM overlap.** Both declare external dependencies
 (APM context blocks, A3IP MCPs / tools / other skills), both support
 a manifest-based declaration of what's needed, both can be consumed
 by an AI runtime to compose a working agent.
 
-**Where A3IP differs.** APM solves the **dependency resolution**
-problem; A3IP solves the **install protocol** problem. APM specifies
-*what to load*; A3IP specifies *how to set it up on a specific
-machine, with this user's secrets, against this user's tools*. A3IP
-adds: a CONFIGURE.md wizard the install AI walks the user through, an
-INSTALL.md the AI follows step by step, a permissions block the user
-confirms before anything runs, and a normative uninstall protocol.
+**Where A3IP differs.** APM already does dependency resolution *and*
+installation — `apm install` is a real installer with a lockfile,
+security scanning, and policy enforcement. So the honest difference
+is narrow: APM's install is a deterministic CLI governed by policy;
+A3IP's is *conversational*, run by the receiving AI, which walks the
+user through CONFIGURE.md, follows INSTALL.md step by step, and
+presents a permissions plan for the user to confirm. A3IP declares
+permissions for an AI to present; APM enforces policy at install. For
+developer workflows, APM's model is more complete and better
+supported.
 
-**Where A3IP and APM compose.** An APM context block can live inside
-an A3IP package as a dependency — declared in `manifest.yaml` under
-`dependencies.apm:` (proposed for spec v1.11). The install AI then
-fetches the APM context as part of its install plan, after the user
-has confirmed permissions. An A3IP `export --format apm` adapter is
-planned for the inverse direction.
+**Where A3IP and APM compose.** They do not compose today. Two
+integrations were proposed and never built: a `dependencies.apm:`
+manifest block and an `export --format apm` adapter. Both were on the
+roadmap when the project was active; neither shipped.
 
-**Adapter status:** planned. The export adapter is on the v1.11
-spec roadmap.
+**Adapter status:** not built.
 
 ---
 
@@ -112,8 +117,9 @@ A3IP is the install protocol that delivers it. SKILL.md doesn't
 declare external dependencies, configuration keys, or permissions;
 A3IP does.
 
-**Where A3IP and SKILL.md compose.** A3IP is a **strict superset** of
-SKILL.md. The platforms that support SKILL.md (Claude Code, Codex,
+**Where A3IP and SKILL.md compose.** A3IP builds directly on
+SKILL.md — it adopts the format unchanged and wraps packaging and
+install around it. The platforms that support SKILL.md (Claude Code, Codex,
 Cursor, GitHub Copilot, Windsurf) automatically support the skill
 component inside any A3IP package — the runtime adapter just copies
 the SKILL.md into the platform's skills directory and the existing
@@ -162,8 +168,8 @@ manifest's `dependencies.mcp:` block; no separate adapter needed.
 | Standard | What it does | A3IP relation | Adapter status |
 |---|---|---|---|
 | **Cowork Plugins** | Packaging + install for Cowork-native plugins | Cross-platform sibling; A3IP packages target Cowork first-class | Authored (cowork runtime adapter) |
-| **Microsoft APM** | Agent context dependency resolution | Composes — APM context blocks as A3IP dependencies; A3IP adds install layer | Planned (v1.11 spec roadmap) |
-| **SKILL.md** | Single-skill invocation contract | Superset — A3IP adopts SKILL.md as native skill component format | Native |
+| **Microsoft APM** | Dependency manager + installer for agent context (resolve, pin, scan, policy, 7 harnesses) | Large overlap; A3IP's only distinct angle is a conversational AI-run install | Not built |
+| **SKILL.md** | Single-skill invocation contract | Adopts SKILL.md unchanged as its skill component format | Native |
 | **MCP** | Runtime wire protocol for AI-tool calls | Composes — A3IP declares MCP dependencies; MCP delivers them at runtime | Native |
 
 ---
@@ -176,8 +182,8 @@ For clarity, A3IP does NOT aim to compete with or replace:
 - **Anthropic's, OpenAI's, or Microsoft's commercial agent products.** A3IP is a format and protocol, not a product.
 - **MCP's tool-call protocol.** A3IP and MCP solve different layers.
 - **The SKILL.md format.** A3IP adopts SKILL.md verbatim as its skill component.
-- **APM's dependency resolution model.** A3IP adds the install protocol; APM keeps the dependency model.
-- **Cowork Plugins as a distribution channel.** A3IP can publish to Cowork's plugin marketplace via the planned export adapter.
+- **APM.** APM already covers dependency resolution and installation for developers; A3IP only explored a conversational install variant.
+- **Cowork Plugins as a distribution channel.** A3IP does not distribute through Cowork's marketplace — the export adapter was proposed, not built.
 
 A3IP's contribution is the **install protocol layer** — manifest with
 explicit permissions, CONFIGURE.md wizard, INSTALL.md plan, user
@@ -203,4 +209,4 @@ standards is technical, not contractual.
 
 ---
 
-*A3IP Specification v1.10 · © 2026 Maksym Prydorozhko · [a3ip.dev](https://a3ip.dev)*
+*A3IP Specification v1.11 · © 2026 Maksym Prydorozhko · [a3ip.dev](https://a3ip.dev)*
